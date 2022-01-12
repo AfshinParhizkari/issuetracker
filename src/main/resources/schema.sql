@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS issue;
 CREATE TABLE issue (
     issueid INT IDENTITY PRIMARY KEY,
     issuetype INT NOT NULL,/*0=story, 1=bug*/
-    title varchar2(40) NOT NULL,
+    title varchar2(45) NOT NULL,
     description varchar2(100),
     creationdate datetime NOT NULL DEFAULT current_timestamp(),
     assignedev varchar2(10),

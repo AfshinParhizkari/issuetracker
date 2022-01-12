@@ -7,7 +7,7 @@ INSERT INTO developer(devname) VALUES
 /*insert issue in table*/
 INSERT INTO issue (issueid,issuetype,title,description,assignedev) VALUES
 (1,0,'create h2 database', 'please add 3 tables','afshin'),
-(2,0,'insert data in tables','please use from doc 1','hossein'),
+(2,0,'insert data in tables','please use from doc 1','andre'),
 (3,0,'create entity','please use pojo and anotations','ehsan'),
 (4,0,'create JPA rep.', 'use JPA Interfaces',null),
 (5,0,'create Junit test', 'use Junit4',null),
