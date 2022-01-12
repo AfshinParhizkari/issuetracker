@@ -10,10 +10,9 @@ package ag.pinguin.issuetracker.repository;
  */
 
 import ag.pinguin.issuetracker.entity.Story;
-import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
-public interface StoryDao extends JpaRepository<Story, Integer>{
+public interface StoryDao extends IssueBaseDao<Story>{
 	Story findByIssueid(Integer issueID);
 	List<Story> findByEstimatedpoint(Integer estimatedPointValue);
 	List<Story> findByStatus(String status);

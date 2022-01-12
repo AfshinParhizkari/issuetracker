@@ -11,14 +11,15 @@ package ag.pinguin.issuetracker.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
-
 import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.util.Objects;
-@Entity
+
+@Entity//superclass
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Issue {
     private Integer issueid;
     private Integer issuetype;
@@ -102,15 +103,6 @@ public class Issue {
         return Objects.hash(issueid, issuetype, title, description, creationdate, assignedev);
     }
 
-    @OneToOne(mappedBy = "issueByIssueid")
-    @JsonIgnore
-    public Bug getBugByIssueid() {
-        return bugByIssueid;
-    }
-    public void setBugByIssueid(Bug bugByIssueid) {
-        this.bugByIssueid = bugByIssueid;
-    }
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assignedev", referencedColumnName = "devname",insertable = false,updatable = false)
     @JsonIgnore
@@ -121,11 +113,32 @@ public class Issue {
         this.developerByAssignedev = developerByAssignedev;
     }
 
+    @JsonIgnore
+    @OneToOne(mappedBy = "issueByIssueid")
+    public Bug getBugByIssueid() {
+        return bugByIssueid;
+    }
+    public void setBugByIssueid(Bug bugByIssueid) {
+        this.bugByIssueid = bugByIssueid;
+    }
+    @JsonIgnore
     @OneToOne(mappedBy = "issueByIssueid")
     public Story getStoryByIssueid() {
         return storyByIssueid;
     }
     public void setStoryByIssueid(Story storyByIssueid) {
         this.storyByIssueid = storyByIssueid;
+    }
+
+    @Override
+    public String toString() {
+        return "Issue{" +
+                "issueid=" + issueid +
+                ", issuetype=" + issuetype +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", creationdate=" + creationdate +
+                ", assignedev='" + assignedev + '\'' +
+                '}';
     }
 }

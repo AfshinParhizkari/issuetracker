@@ -13,8 +13,9 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
-@Entity
-public class Bug {
+@Entity//subclass
+@PrimaryKeyJoinColumn(name = "issueid")
+public class Bug extends Issue {
     private Integer issueid;
     private String priority;
     private String status;
@@ -68,5 +69,15 @@ public class Bug {
     }
     public void setIssueByIssueid(Issue issueByIssueid) {
         this.issueByIssueid = issueByIssueid;
+    }
+
+    @Override
+    public String toString() {
+        return "Bug{" +
+                "issueid=" + issueid +
+                ", priority='" + priority + '\'' +
+                ", status='" + status + '\'' +
+                ", issueByIssueid=" + issueByIssueid +
+                '}';
     }
 }

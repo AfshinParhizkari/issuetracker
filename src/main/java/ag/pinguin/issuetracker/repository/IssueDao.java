@@ -9,11 +9,10 @@ package ag.pinguin.issuetracker.repository;
  * Description:
  */
 import ag.pinguin.issuetracker.entity.Issue;
-import org.springframework.data.jpa.repository.JpaRepository;
 import java.sql.Timestamp;
 import java.util.List;
 
-public interface IssueDao extends JpaRepository<Issue, Integer>{
+public interface IssueDao extends IssueBaseDao<Issue>{
 	Issue findByIssueid(Integer issueID);
 	List<Issue> findByAssignedev(String assigneDeveloper);
 	List<Issue> findByIssuetype(Integer issueType);

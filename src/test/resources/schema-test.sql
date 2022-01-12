@@ -1,8 +1,6 @@
-DROP TABLE IF EXISTS developer;
 CREATE TABLE developer (
     devname varchar2(10) NOT NULL PRIMARY KEY
 );
-DROP TABLE IF EXISTS issue;
 CREATE TABLE issue (
     issueid INT IDENTITY PRIMARY KEY,
     issuetype INT NOT NULL,/*0=story, 1=bug*/
@@ -12,14 +10,12 @@ CREATE TABLE issue (
     assignedev varchar2(10),
     foreign key (assignedev) references developer(devname)
 );
-DROP TABLE IF EXISTS story;
 CREATE TABLE story (
     issueid INT IDENTITY PRIMARY KEY,
     estimatedpoint INT NOT NULL,/*from 1(Low) to 5(High)*/
     status varchar2(10) NOT NULL,/*New,Estimated,Completed*/
     foreign key (issueid) references issue(issueid)
 );
-DROP TABLE IF EXISTS bug;
 CREATE TABLE bug (
     issueid INT IDENTITY PRIMARY KEY,
     priority varchar2(10) NOT NULL,/*Critical,Major,Minor*/

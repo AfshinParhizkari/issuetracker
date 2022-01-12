@@ -10,10 +10,9 @@ package ag.pinguin.issuetracker.repository;
  */
 
 import ag.pinguin.issuetracker.entity.Bug;
-import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
-public interface BugDao extends JpaRepository<Bug, Integer>{
+public interface BugDao extends IssueBaseDao<Bug>{
 	Bug findByIssueid(Integer issueID);
 	List<Bug> findByPriority(String priority);
 	List<Bug> findByStatus(String status);
