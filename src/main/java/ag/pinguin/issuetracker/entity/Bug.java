@@ -77,7 +77,7 @@ public class Bug extends Issue {
                 "issueid=" + issueid +
                 ", priority='" + priority + '\'' +
                 ", status='" + status + '\'' +
-                ", issueByIssueid=" + issueByIssueid +
+                //", issueByIssueid=" + issueByIssueid +
                 '}';
     }
 }
