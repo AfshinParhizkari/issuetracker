@@ -12,10 +12,9 @@ import ag.pinguin.issuetracker.entity.Issue;
 import java.sql.Timestamp;
 import java.util.List;
 
-public interface IssueDao extends IssueBaseDao<Issue>{
-	Issue findByIssueid(Integer issueID);
-	List<Issue> findByAssignedev(String assigneDeveloper);
-	List<Issue> findByIssuetype(Integer issueType);
-	List<Issue> findByTitleLike(String title);
-	List<Issue> findByCreationdateBetween(Timestamp fromDate,Timestamp toDate);
+public interface IssueDao<T extends Issue>{
+	T findByIssueid(Integer issueID);
+	List<T> findByAssignedev(String assigneDeveloper);
+	List<T> findByTitleLike(String title);
+	List<T> findByCreationdateBetween(Timestamp fromDate,Timestamp toDate);
 }

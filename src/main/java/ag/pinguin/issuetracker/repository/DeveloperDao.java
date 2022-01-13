@@ -12,6 +12,8 @@ import ag.pinguin.issuetracker.entity.Developer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
-public interface DeveloperDao extends JpaRepository<Developer, String>{
+public interface DeveloperDao extends JpaRepository<Developer, Integer>{
+	List<Developer> findByDevid(Integer developerID);
 	List<Developer> findByDevname(String developerName);
+	List<Developer> findByDevnameLike(String developerName);
 }

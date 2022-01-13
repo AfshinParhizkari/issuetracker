@@ -1,28 +1,30 @@
+DROP TABLE IF EXISTS developer;
 CREATE TABLE developer (
-    devname varchar2(10) NOT NULL PRIMARY KEY
+                           devid INT NOT NULL IDENTITY PRIMARY KEY,
+                           devname varchar2(15) NOT NULL
 );
-CREATE TABLE issue (
-    issueid INT IDENTITY PRIMARY KEY,
-    issuetype INT NOT NULL,/*0=story, 1=bug*/
-    title varchar2(45) NOT NULL,
-    description varchar2(100),
-    creationdate datetime NOT NULL DEFAULT current_timestamp(),
-    assignedev varchar2(10),
-    foreign key (assignedev) references developer(devname)
-);
+DROP TABLE IF EXISTS story;
 CREATE TABLE story (
-    issueid INT IDENTITY PRIMARY KEY,
-    estimatedpoint INT NOT NULL,/*from 1(Low) to 5(High)*/
-    status varchar2(10) NOT NULL,/*New,Estimated,Completed*/
-    foreign key (issueid) references issue(issueid)
+                       issueid INT AUTO_INCREMENT PRIMARY KEY,
+                       title varchar2(45) NOT NULL,
+                       description varchar2(100),
+                       creationdate datetime NOT NULL DEFAULT current_timestamp(),
+                       estimatedpoint INT NOT NULL,/*from 1(Low) to 5(High)*/
+                       status varchar2(10) NOT NULL,/*New,Estimated,Completed*/
+                       assignedev INT,
+                       foreign key (assignedev) references developer(devid)
 );
+DROP TABLE IF EXISTS bug;
 CREATE TABLE bug (
-    issueid INT IDENTITY PRIMARY KEY,
-    priority varchar2(10) NOT NULL,/*Critical,Major,Minor*/
-    status varchar2(10) NOT NULL,/*New,Verified,Resolved*/
-    foreign key (issueid) references issue(issueid)
+                     issueid INT AUTO_INCREMENT PRIMARY KEY,
+                     title varchar2(45) NOT NULL,
+                     description varchar2(100),
+                     creationdate datetime NOT NULL DEFAULT current_timestamp(),
+                     priority varchar2(10) NOT NULL,/*Critical,Major,Minor*/
+                     status varchar2(10) NOT NULL,/*New,Verified,Resolved*/
+                     assignedev INT,
+                     foreign key (assignedev) references developer(devid)
 );
-
 /*
 CREATE USER guest PASSWORD '123' ADMIN ;
 GRANT ALTER ANY SCHEMA TO guest;

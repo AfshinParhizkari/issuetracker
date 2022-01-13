@@ -8,24 +8,26 @@ package ag.pinguin.issuetracker.entity;
  * Email:       Afshin.Parhizkari@gmail.com
  * Description:
  */
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.validation.constraints.NotEmpty;
-import java.util.Collection;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 @Entity
 public class Developer {
+    private Integer devid;
     private String devname;
-    private Collection<Issue> issuesByDevname;
 
     @Id
+    @Column(name = "devid")
+    @NotNull(message = "Developer ID is required")
+    public Integer getDevid() {return devid;}
+    public void setDevid(Integer devid) {this.devid = devid;}
+
     @Column(name = "devname")
-    //@NotEmpty(message = "Developer name is required")
+    @NotEmpty(message = "Developer name is required")
     public String getDevname() {
         return devname;
     }
@@ -38,26 +40,16 @@ public class Developer {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Developer developer = (Developer) o;
-        return Objects.equals(devname, developer.devname);
+        return Objects.equals(devid, developer.devid) && Objects.equals(devname, developer.devname);
     }
     @Override
-    public int hashCode() {
-        return Objects.hash(devname);
-    }
-
-    @OneToMany(mappedBy = "developerByAssignedev")
-    @JsonIgnore
-    public Collection<Issue> getIssuesByIddeveloper() {
-        return issuesByDevname;
-    }
-    public void setIssuesByIddeveloper(Collection<Issue> issuesByIddeveloper) {
-        this.issuesByDevname = issuesByIddeveloper;
-    }
+    public int hashCode() {return Objects.hash(devid, devname);}
 
     @Override
     public String toString() {
         return "Developer{" +
-                "devname='" + devname + '\'' +
+                "devid=" + devid +
+                ", devname='" + devname + '\'' +
                 '}';
     }
 }

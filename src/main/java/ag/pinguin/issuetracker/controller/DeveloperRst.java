@@ -18,20 +18,23 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping("/rst/developer")
-@Tag(name = "Developer",description = "Developer info can show via this rest service")
+@Tag(name = "Developer",description = "Developer info can show and change via this rest service")
 public class DeveloperRst {
     @Autowired private DeveloperDao dao;
 
-    @Operation(summary = "Get a developer by developer name")
+    @Operation(summary = "Get a developer by developer ID")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "Examples for get Developer(s)",
             required = true,
@@ -40,12 +43,12 @@ public class DeveloperRst {
                     examples = {
                             @ExampleObject(
                                     name = "All Developers",
-                                    value = "{\"devname\": \"\"}",
-                                    summary = "All Developers"),
+                                    value = "{\"devid\": null}",
+                                    summary = "show all Developers"),
                             @ExampleObject(
                                     name = "Just developer name andre",
-                                    value = "{\"devname\":\"andre\"}",
-                                    summary = "One developer") }))
+                                    value = "{\"devid\":1}",
+                                    summary = "show a developer") }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "found the developer", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = Developer.class))}),
@@ -54,11 +57,11 @@ public class DeveloperRst {
     @PostMapping(value = "/find" ,consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
     public String find(@RequestBody Developer developer) throws Exception {
         List<Developer> returnData;
-        if(developer.getDevname()==null || developer.getDevname().isEmpty()) {
+        if(developer.getDevid()==null) {
             returnData = (dao.findAll());
         }else
-            returnData = (dao.findByDevname(developer.getDevname()));
-        return  (new ObjectMapper()).writeValueAsString(returnData);
+            returnData = (dao.findByDevid(developer.getDevid()));
+        return (new ObjectMapper()).writeValueAsString(returnData);
     }
 
     @Operation(summary = "Delete a developer")
@@ -70,18 +73,20 @@ public class DeveloperRst {
                     examples = {
                              @ExampleObject(
                                     name = "delete developer hossein",
-                                    value = "{\"devname\":\"hossein\"}",
+                                    value = "{\"devid\":3}",
                                     summary = "delete developer") }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "record is deleted"),
+            @ApiResponse(responseCode = "200", description = "Developer is deleted"),
             @ApiResponse(responseCode = "400", description = "Invalid developer name", content = @Content),
             @ApiResponse(responseCode = "404", description = "developer name not found", content = @Content) })
     @DeleteMapping(value = "/delete",consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
-    public void delete(@RequestBody Developer developer) throws Exception {
-        dao.delete(developer);
+    public void delete(@RequestBody String receivedData) throws Exception {
+        JSONObject json = new JSONObject(receivedData);
+        Integer developerID=json.optInt("devid",0);
+        dao.deleteById(developerID);
     }
 
-    @Operation(summary = "create a developer by developer name")
+    @Operation(summary = "create or update a developer by developer ID")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "Examples for create new Developer",
             required = true,
@@ -89,18 +94,42 @@ public class DeveloperRst {
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     examples = {
                             @ExampleObject(
-                                    name = "create developer mahdieh",
-                                    value = "{\"devname\":\"mahdieh\"}",
-                                    summary = "create developer") }))
+                                    name = "create new developer mahdieh",
+                                    value = "{\"devid\":\"5\"," +
+                                              "\"devname\":\"mahdieh\"" +
+                                            "}",
+                                    summary = "create developer"),
+                            @ExampleObject(
+                                    name = "update developer afshin",
+                                    value = "{\"devid\":\"4\"," +
+                                            "\"devname\":\"afshin-update\"" +
+                                            "}",
+                                    summary = "update developer") }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "record is created"),
             @ApiResponse(responseCode = "400", description = "Invalid developer name", content = @Content) })
     @PutMapping(value = "/save" ,consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
     public String save(@Valid @RequestBody Developer developer) throws Exception {
-        if(dao.findByDevname(developer.getDevname()).size()==0) {
-            dao.save(developer);
-           return "{\"message\":\"new developer is added\"}";
-       }else
-            return "{\"message\":\"developer is already saved\"}";
+        String message="Error";
+        List<Developer> developers= dao.findByDevid(developer.getDevid());
+        if(developers.size()==0) {
+            developer=dao.save(developer);
+            if(developer==null)
+                message= "{\"message\":\"developer is Not added. some problem is occurred\"}";
+            else
+                message= "{\"message\":\"new developer is added\"}";
+        }else {
+            developers.get(0).setDevname(developer.getDevname());
+            developer=dao.save(developers.get(0));
+            message= "{\"message\":\"developer is updated\"}";
+        }
+        return message;
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(value=HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public ResponseEntity<Object> generalException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ExceptionUtils.getRootCause(ex).getMessage());
     }
 }

@@ -8,30 +8,19 @@ package ag.pinguin.issuetracker.entity;
  * Email:       Afshin.Parhizkari@gmail.com
  * Description:
  */
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
-@Entity//subclass
-@PrimaryKeyJoinColumn(name = "issueid")
+@Entity
+@Table(name = "bug")
 public class Bug extends Issue {
-    private Integer issueid;
     private String priority;
     private String status;
-    private Issue issueByIssueid;
 
-    @Id
-    @Column(name = "issueid")
-    @NotNull(message = "issueid is required")
-    public Integer getIssueid() {
-        return issueid;
-    }
-    public void setIssueid(Integer issueid) {
-        this.issueid = issueid;
-    }
-
-    @Basic
     @Column(name = "priority")
     public String getPriority() {
         return priority;
@@ -40,7 +29,6 @@ public class Bug extends Issue {
         this.priority = priority;
     }
 
-    @Basic
     @Column(name = "status")
     @NotEmpty(message = "status is required")
     public String getStatus() {
@@ -55,29 +43,18 @@ public class Bug extends Issue {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Bug bug = (Bug) o;
-        return Objects.equals(issueid, bug.issueid) && Objects.equals(priority, bug.priority) && Objects.equals(status, bug.status);
+        return Objects.equals(priority, bug.priority) && Objects.equals(status, bug.status);
     }
     @Override
     public int hashCode() {
-        return Objects.hash(issueid, priority, status);
-    }
-
-    @OneToOne
-    @JoinColumn(name = "issueid", referencedColumnName = "issueid", nullable = false)
-    public Issue getIssueByIssueid() {
-        return issueByIssueid;
-    }
-    public void setIssueByIssueid(Issue issueByIssueid) {
-        this.issueByIssueid = issueByIssueid;
+        return Objects.hash(priority, status);
     }
 
     @Override
     public String toString() {
         return "Bug{" +
-                "issueid=" + issueid +
-                ", priority='" + priority + '\'' +
+                "priority='" + priority + '\'' +
                 ", status='" + status + '\'' +
-                //", issueByIssueid=" + issueByIssueid +
-                '}';
+                '}'+super.toString();
     }
 }

@@ -10,30 +10,25 @@ package ag.pinguin.issuetracker.entity;
  */
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.*;
 import javax.persistence.*;
-import javax.validation.constraints.Max;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.util.Objects;
 
-@Entity//superclass
-@Inheritance(strategy = InheritanceType.JOINED)
+@MappedSuperclass
 public class Issue {
     private Integer issueid;
-    private Integer issuetype;
     private String title;
     private String description;
     private Timestamp creationdate;
-    private String assignedev;
-    private Bug bugByIssueid;
+    private Integer assignedev;
     private Developer developerByAssignedev;
-    private Story storyByIssueid;
 
     @Id
+    @GeneratedValue(strategy=GenerationType.IDENTITY) //specify the generation strategy used for the primary key.
     @Column(name = "issueid")
-    @NotNull(message = "issueid is required")
+    //@NotNull(message = "issueid is required")
     public Integer getIssueid() {
         return issueid;
     }
@@ -41,18 +36,6 @@ public class Issue {
         this.issueid = issueid;
     }
 
-    @Basic
-    @Column(name = "issuetype")
-    @NotNull(message = "issuetype is required")
-    @Max(value = 1,message = "issuetype is 0=story or 1=bug") // must be an integer value lower than or equal to the number in the value element.
-    public Integer getIssuetype() {
-        return issuetype;
-    }
-    public void setIssuetype(Integer issuetype) {
-        this.issuetype = issuetype;
-    }
-
-    @Basic
     @Column(name = "title")
     @NotEmpty(message = "Developer name is required")
     public String getTitle() {
@@ -62,7 +45,6 @@ public class Issue {
         this.title = title;
     }
 
-    @Basic
     @Column(name = "description")
     public String getDescription() {
         return description;
@@ -71,7 +53,6 @@ public class Issue {
         this.description = description;
     }
 
-    @Basic
     @Column(name = "creationdate")
     @CreationTimestamp
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss", timezone="Asia/Tehran")
@@ -82,29 +63,12 @@ public class Issue {
         this.creationdate = creationdate;
     }
 
-    @Basic
     @Column(name = "assignedev")
-    public String getAssignedev() {
-        return assignedev;
-    }
-    public void setAssignedev(String assignedev) {
-        this.assignedev = assignedev;
-    }
+    public Integer getAssignedev() {return assignedev;}
+    public void setAssignedev(Integer assignedev) {this.assignedev = assignedev;}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Issue issue = (Issue) o;
-        return Objects.equals(issueid, issue.issueid) && Objects.equals(issuetype, issue.issuetype) && Objects.equals(title, issue.title) && Objects.equals(description, issue.description) && Objects.equals(creationdate, issue.creationdate) && Objects.equals(assignedev, issue.assignedev);
-    }
-    @Override
-    public int hashCode() {
-        return Objects.hash(issueid, issuetype, title, description, creationdate, assignedev);
-    }
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "assignedev", referencedColumnName = "devname",insertable = false,updatable = false)
+    @ManyToOne
+    @JoinColumn(name = "assignedev", referencedColumnName = "devid",insertable = false,updatable = false)
     @JsonIgnore
     public Developer getDeveloperByAssignedev() {
         return developerByAssignedev;
@@ -113,32 +77,26 @@ public class Issue {
         this.developerByAssignedev = developerByAssignedev;
     }
 
-    @JsonIgnore
-    @OneToOne(mappedBy = "issueByIssueid")
-    public Bug getBugByIssueid() {
-        return bugByIssueid;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Issue issue = (Issue) o;
+        return Objects.equals(issueid, issue.issueid) && Objects.equals(title, issue.title) && Objects.equals(description, issue.description) && Objects.equals(creationdate, issue.creationdate) && Objects.equals(assignedev, issue.assignedev) && Objects.equals(developerByAssignedev, issue.developerByAssignedev);
     }
-    public void setBugByIssueid(Bug bugByIssueid) {
-        this.bugByIssueid = bugByIssueid;
-    }
-    @JsonIgnore
-    @OneToOne(mappedBy = "issueByIssueid")
-    public Story getStoryByIssueid() {
-        return storyByIssueid;
-    }
-    public void setStoryByIssueid(Story storyByIssueid) {
-        this.storyByIssueid = storyByIssueid;
+    @Override
+    public int hashCode() {
+        return Objects.hash(issueid, title, description, creationdate, assignedev, developerByAssignedev);
     }
 
     @Override
     public String toString() {
         return "Issue{" +
                 "issueid=" + issueid +
-                ", issuetype=" + issuetype +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", creationdate=" + creationdate +
-                ", assignedev='" + assignedev + '\'' +
+                ", assignedev=" + assignedev +
                 '}';
     }
 }

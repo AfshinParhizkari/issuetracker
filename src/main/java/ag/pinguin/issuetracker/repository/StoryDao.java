@@ -9,11 +9,14 @@ package ag.pinguin.issuetracker.repository;
  * Description:
  */
 
+import ag.pinguin.issuetracker.entity.Bug;
 import ag.pinguin.issuetracker.entity.Story;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.sql.Timestamp;
 import java.util.List;
 
-public interface StoryDao extends IssueBaseDao<Story>{
-	Story findByIssueid(Integer issueID);
+public interface StoryDao extends JpaRepository<Story,Integer>,IssueDao<Story>{
 	List<Story> findByEstimatedpoint(Integer estimatedPointValue);
 	List<Story> findByStatus(String status);
 }
