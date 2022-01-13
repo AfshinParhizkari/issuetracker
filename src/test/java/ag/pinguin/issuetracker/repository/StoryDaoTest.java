@@ -1,18 +1,24 @@
 package ag.pinguin.issuetracker.repository;
 
 import ag.pinguin.issuetracker.IssuetrackerApplication;
+import ag.pinguin.issuetracker.entity.IssueDTO;
 import ag.pinguin.issuetracker.entity.Story;
+import ag.pinguin.issuetracker.entity.StoryStatus;
+import ag.pinguin.issuetracker.service.PlanStory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import java.util.List;
-import java.util.UUID;
 
-import static org.junit.Assert.*;
+import java.util.*;
+import java.util.stream.IntStream;
 
 /**
  * @Project issuetracker
@@ -28,8 +34,10 @@ import static org.junit.Assert.*;
 @ContextConfiguration(classes={Story.class, StoryDao.class})
 @ActiveProfiles("test")
 public class StoryDaoTest {
-    @Autowired Story story;
-    @Autowired StoryDao dao;
+    @Autowired private Story story;
+    @Autowired private StoryDao dao;
+    @Autowired private DeveloperDao devDao;
+    final static int capacity=10;
     String issueID="727e2463-f682-4389-97d2-f7e852feafce";
 
     @Test
@@ -68,4 +76,24 @@ public class StoryDaoTest {
         dao.save(story);
         System.out.println("Story is updated: " +story);
     }
+
+    @Test
+    public void findFreestDeveloper() {
+        List<IssueDTO> devCapacities=PlanStory.convertArray2IssueDTO(dao.getCountOfDeveloperTasks());
+        devCapacities.forEach(System.out::println);
+
+        IssueDTO issueDTO =  Collections.min(devCapacities, Comparator.comparing(s -> s.getCount()));
+        System.out.println("The freest developer is : " + issueDTO);
+    }
+
+    @Test
+    public void printNotAssignedStoryForThisWeek() {
+        int developerCount=(int)devDao.count();
+        Pageable currentWeekTasks =  PageRequest.of(0, capacity*developerCount, Sort.by("creationdate").descending());
+        Page<Story> stories =dao.findByStatusNotContains(currentWeekTasks,StoryStatus.Completed);
+        System.out.println("count of unassigned tasks: "+ dao.countByStatusNotContains(StoryStatus.Completed));
+        System.out.println("count of developers: "+ capacity*developerCount);
+        stories.forEach(System.out::println);
+    }
+
 }

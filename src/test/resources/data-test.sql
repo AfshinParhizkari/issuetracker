@@ -13,7 +13,7 @@ VALUES ('727e2463-f682-4389-97d2-f7e852feafce', 'create h2 database', 'please ad
        ('03b0aa47-1c81-4dd1-8e87-5ed468cfabfa', 'create Junit test', 'use Junit4', 5, 'New', null),
        ('9f39cb2d-14df-4677-bc90-87d99bfc96af', 'create calc. service1', 'Please provide a GET plan endiont', 5, 'New', null),
        ('2d800ebc-c402-43a9-b984-fd209219570f', 'create calc. service2', 'Please provide a planning algorithm', 5, 'New', null),
-       ('aba0dba2-5b69-4f22-bbe9-d715402f0974', 'create calc. service2', 'check total less than dev*10', 5, 'New', null),
+       ('aba0dba2-5b69-4f22-bbe9-d715402f0974', 'create calc. service3', 'check total less than dev*10', 5, 'New', null),
        ('275848de-0040-43d2-a617-d47d04205b95', 'create controller ', 'Restfull webservices', 4, 'New', null),
        ('f9b34a9b-8999-4e1d-a266-f9de5613a042', 'test rest services', 'with swager or postman', 4, 'New', null),
        ('4308d381-3104-4513-86f7-cffaddcb010f', 'create ui', 'use JSP ajax JQuery Bootstrap5', 3, 'New', null),

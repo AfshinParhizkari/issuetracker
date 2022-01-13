@@ -55,7 +55,7 @@ public class DeveloperRst {
             @ApiResponse(responseCode = "400", description = "Invalid Developer name", content = @Content),
             @ApiResponse(responseCode = "404", description = "Developer not found", content = @Content) })
     @PostMapping(value = "/find" ,consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
-    public String find(@RequestBody Developer developer) throws Exception {
+    public String findDeveloper(@RequestBody Developer developer) throws Exception {
         List<Developer> returnData;
         if(developer.getDevid()==null) {
             returnData = (dao.findAll());
@@ -80,7 +80,7 @@ public class DeveloperRst {
             @ApiResponse(responseCode = "400", description = "Invalid developer name", content = @Content),
             @ApiResponse(responseCode = "404", description = "developer name not found", content = @Content) })
     @DeleteMapping(value = "/delete",consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
-    public void delete(@RequestBody String receivedData) throws Exception {
+    public void deleteDeveloper(@RequestBody String receivedData) throws Exception {
         JSONObject json = new JSONObject(receivedData);
         Integer developerID=json.optInt("devid",0);
         dao.deleteById(developerID);
@@ -109,7 +109,7 @@ public class DeveloperRst {
             @ApiResponse(responseCode = "200", description = "record is created"),
             @ApiResponse(responseCode = "400", description = "Invalid developer name", content = @Content) })
     @PutMapping(value = "/save" ,consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
-    public String save(@Valid @RequestBody Developer developer) throws Exception {
+    public String saveDeveloper(@Valid @RequestBody Developer developer) throws Exception {
         String message="Error";
         List<Developer> developers= dao.findByDevid(developer.getDevid());
         if(developers.size()==0) {

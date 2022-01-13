@@ -37,4 +37,9 @@ public class DeveloperDaoTest {
         List<Developer> developers= dao.findAll();
         developers.forEach(System.out::println);
     }
+
+    @Test
+    public void countDevelopers() {
+        System.out.println(dao.count());
+    }
 }

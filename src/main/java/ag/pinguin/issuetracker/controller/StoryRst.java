@@ -10,6 +10,7 @@ package ag.pinguin.issuetracker.controller;
  */
 import ag.pinguin.issuetracker.entity.Story;
 import ag.pinguin.issuetracker.repository.StoryDao;
+import ag.pinguin.issuetracker.service.PlanStory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -35,6 +36,7 @@ import java.util.UUID;
 @Tag(name = "story",description = "story info can show and change via this rest service")
 public class StoryRst {
     @Autowired private StoryDao dao;
+    @Autowired private PlanStory srv;
 
     @Operation(summary = "Get a story by issueID")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -57,7 +59,7 @@ public class StoryRst {
             @ApiResponse(responseCode = "400", description = "Invalid story", content = @Content),
             @ApiResponse(responseCode = "404", description = "story not found", content = @Content) })
     @PostMapping(value = "/find" ,consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
-    public String find(@RequestBody Story story) throws Exception {
+    public String findStory(@RequestBody Story story) throws Exception {
         List<Story> returnData=new ArrayList<>();
         if(story.getIssueid().isEmpty()) {
             returnData = (dao.findAll());
@@ -82,7 +84,7 @@ public class StoryRst {
             @ApiResponse(responseCode = "400", description = "Invalid story", content = @Content),
             @ApiResponse(responseCode = "404", description = "story not found", content = @Content) })
     @DeleteMapping(value = "/delete",consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
-    public void delete(@RequestBody String receivedData) throws Exception {
+    public void deleteStory(@RequestBody String receivedData) throws Exception {
         JSONObject json = new JSONObject(receivedData);
         String storyID=json.optString("issueid","");
         dao.deleteById(storyID);
@@ -99,8 +101,8 @@ public class StoryRst {
                                     name = "create new story",
                                     value = "{\"title\":\"add security\"," +
                                             "\"description\":\"transfer data from h2 to mysql for EDW\"," +
-                                            "\"estimatedpoint\":null," +
-                                            "\"status\":\"\"" +
+                                            "\"estimatedpoint\":0," +
+                                            "\"status\":\"New\"" +
                                             "}",
                                     summary = "create story"),
                             @ExampleObject(
@@ -116,7 +118,7 @@ public class StoryRst {
             @ApiResponse(responseCode = "200", description = "record is created"),
             @ApiResponse(responseCode = "400", description = "Invalid story name", content = @Content) })
     @PutMapping(value = "/save" ,consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
-    public String save(@Valid @RequestBody Story story) throws Exception {
+    public String saveStory(@Valid @RequestBody Story story) throws Exception {
         String message="Error";
         Story dbstory= dao.findByIssueid(story.getIssueid());
         if(dbstory==null) {
@@ -135,6 +137,12 @@ public class StoryRst {
             message= "{\"message\":\"story is updated\"}";
         }
         return message;
+    }
+
+    @Operation(summary = "Plan all unassigned stories(max:10*Count(dev) for a week) to developers")
+    @GetMapping(value = "/plan" ,produces = MediaType.APPLICATION_JSON_VALUE)
+    public String planStory() throws Exception {
+        return (new ObjectMapper()).writeValueAsString(srv.planStory());
     }
 
     @ExceptionHandler(Exception.class)
