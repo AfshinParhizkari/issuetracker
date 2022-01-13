@@ -16,7 +16,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.sql.Timestamp;
 import java.util.List;
 
-public interface StoryDao extends JpaRepository<Story,Integer>,IssueDao<Story>{
+public interface StoryDao extends JpaRepository<Story,String>,IssueDao<Story>{
 	List<Story> findByEstimatedpoint(Integer estimatedPointValue);
 	List<Story> findByStatus(String status);
 }

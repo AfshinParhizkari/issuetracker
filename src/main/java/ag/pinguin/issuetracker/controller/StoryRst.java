@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/rst/story")
@@ -44,11 +45,11 @@ public class StoryRst {
                     examples = {
                             @ExampleObject(
                                     name = "All storys",
-                                    value = "{\"issueid\": null}",
+                                    value = "{\"issueid\": \"\"}",
                                     summary = "show all storys"),
                             @ExampleObject(
                                     name = "One story",
-                                    value = "{\"issueid\":1}",
+                                    value = "{\"issueid\":\"727e2463-f682-4389-97d2-f7e852feafce\"}",
                                     summary = "show a story") }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "found the story", content = {
@@ -58,7 +59,7 @@ public class StoryRst {
     @PostMapping(value = "/find" ,consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
     public String find(@RequestBody Story story) throws Exception {
         List<Story> returnData=new ArrayList<>();
-        if(story.getIssueid()==null) {
+        if(story.getIssueid().isEmpty()) {
             returnData = (dao.findAll());
         }else
             returnData.add(dao.findByIssueid(story.getIssueid()));
@@ -74,7 +75,7 @@ public class StoryRst {
                     examples = {
                             @ExampleObject(
                                     name = "delete story",
-                                    value = "{\"issueid\":2}",
+                                    value = "{\"issueid\":\"396eaf1b-1f11-45bd-9a0f-2107edd3112b\"}",
                                     summary = "delete story") }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "story is deleted"),
@@ -83,7 +84,7 @@ public class StoryRst {
     @DeleteMapping(value = "/delete",consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
     public void delete(@RequestBody String receivedData) throws Exception {
         JSONObject json = new JSONObject(receivedData);
-        Integer storyID=json.optInt("issueid",0);
+        String storyID=json.optString("issueid","");
         dao.deleteById(storyID);
     }
 
@@ -98,20 +99,20 @@ public class StoryRst {
                                     name = "create new story",
                                     value = "{\"title\":\"add security\"," +
                                             "\"description\":\"transfer data from h2 to mysql for EDW\"," +
-                                            "\"estimatedpoint\":3," +
-                                            "\"status\":\"Estimated\"" +
+                                            "\"estimatedpoint\":null," +
+                                            "\"status\":\"\"" +
                                             "}",
                                     summary = "create story"),
                             @ExampleObject(
                                     name = "update story",
-                                    value = "{\"issueid\":\"1\"," +
+                                    value = "{\"issueid\":\"727e2463-f682-4389-97d2-f7e852feafce\"," +
                                             "\"title\":\"use SSIS for ETL\"," +
                                             "\"description\":\"we have data lost when service restart\"," +
                                             "\"estimatedpoint\":3," +
                                             "\"status\":\"Verified\"" +
                                             "}",
                                     summary = "update story") }))
-    @ApiResponses(value = {
+            @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "record is created"),
             @ApiResponse(responseCode = "400", description = "Invalid story name", content = @Content) })
     @PutMapping(value = "/save" ,consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
@@ -119,6 +120,7 @@ public class StoryRst {
         String message="Error";
         Story dbstory= dao.findByIssueid(story.getIssueid());
         if(dbstory==null) {
+            story.setIssueid(UUID.randomUUID().toString());
             story=dao.save(story);
             if(story==null)
                 message= "{\"message\":\"story is Not added. some problem is occurred\"}";

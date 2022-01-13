@@ -15,7 +15,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.sql.Timestamp;
 import java.util.List;
 
-public interface BugDao extends JpaRepository<Bug, Integer>,IssueDao<Bug> {
+public interface BugDao extends JpaRepository<Bug, String>,IssueDao<Bug> {
 	List<Bug> findByPriority(String priority);
 	List<Bug> findByStatus(String status);
 

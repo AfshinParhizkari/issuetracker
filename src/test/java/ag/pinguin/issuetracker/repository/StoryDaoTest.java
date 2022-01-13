@@ -10,6 +10,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.util.List;
+import java.util.UUID;
+
 import static org.junit.Assert.*;
 
 /**
@@ -28,7 +30,7 @@ import static org.junit.Assert.*;
 public class StoryDaoTest {
     @Autowired Story story;
     @Autowired StoryDao dao;
-    Integer issueID=2;
+    String issueID="727e2463-f682-4389-97d2-f7e852feafce";
 
     @Test
     public void findAll() {
@@ -47,6 +49,7 @@ public class StoryDaoTest {
     }
     @Test
     public void insertByIssueID() {
+        story.setIssueid(UUID.randomUUID().toString());
         story.setTitle("add security");
         story.setDescription("use jjwt for Authentication and spring.sec for Authorization");
         story.setEstimatedpoint(5);
@@ -56,7 +59,7 @@ public class StoryDaoTest {
     }
     @Test
     public void updateByIssueID() {
-        story=dao.findByIssueid(1);
+        story=dao.findByIssueid(issueID);
         System.out.println("Story: " +story);
         story.setTitle("use SSIS for ETL");
         story.setDescription("transfer data from h2 to mysql for EDW");

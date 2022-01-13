@@ -18,7 +18,7 @@ import java.util.Objects;
 
 @MappedSuperclass
 public class Issue {
-    private Integer issueid;
+    private String issueid;
     private String title;
     private String description;
     private Timestamp creationdate;
@@ -26,13 +26,11 @@ public class Issue {
     private Developer developerByAssignedev;
 
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY) //specify the generation strategy used for the primary key.
-    @Column(name = "issueid")
+    //@GeneratedValue(strategy=GenerationType.IDENTITY) //specify the generation strategy used for the primary key.
+    @Column(name = "issueid",unique=true)
     //@NotNull(message = "issueid is required")
-    public Integer getIssueid() {
-        return issueid;
-    }
-    public void setIssueid(Integer issueid) {
+    public String getIssueid() {return issueid;}
+    public void setIssueid(String issueid) {
         this.issueid = issueid;
     }
 

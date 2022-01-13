@@ -5,7 +5,7 @@ CREATE TABLE developer (
 );
 DROP TABLE IF EXISTS story;
 CREATE TABLE story (
-                       issueid INT AUTO_INCREMENT PRIMARY KEY,
+                       issueid varchar2(36) PRIMARY KEY,
                        title varchar2(45) NOT NULL,
                        description varchar2(100),
                        creationdate datetime NOT NULL DEFAULT current_timestamp(),
@@ -16,7 +16,7 @@ CREATE TABLE story (
 );
 DROP TABLE IF EXISTS bug;
 CREATE TABLE bug (
-                     issueid INT AUTO_INCREMENT PRIMARY KEY,
+                     issueid varchar2(36) PRIMARY KEY,
                      title varchar2(45) NOT NULL,
                      description varchar2(100),
                      creationdate datetime NOT NULL DEFAULT current_timestamp(),

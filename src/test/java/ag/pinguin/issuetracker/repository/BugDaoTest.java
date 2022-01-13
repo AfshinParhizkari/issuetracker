@@ -18,6 +18,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.util.List;
+import java.util.UUID;
+
 import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -27,7 +29,7 @@ import static org.junit.Assert.*;
 public class BugDaoTest {
     @Autowired Bug bug;
     @Autowired BugDao dao;
-    Integer issueID=2;
+    String issueID="6b24ba48-52cd-4e1f-a2d7-beba1d7f456f";
 
     @Test
     public void findAll() {
@@ -46,6 +48,7 @@ public class BugDaoTest {
     }
     @Test
     public void insertByIssueID() {
+        bug.setIssueid(UUID.randomUUID().toString());
         bug.setTitle("ui interface");
         bug.setDescription("responsive does not working in mobile devices");
         bug.setPriority("Minor");
@@ -55,7 +58,7 @@ public class BugDaoTest {
     }
     @Test
     public void updateByIssueID() {
-        bug=dao.findByIssueid(1);
+        bug=dao.findByIssueid(issueID);
         System.out.println("bug: " +bug);
         bug.setTitle("h2 db doesn't persist data");
         bug.setDescription("we have data lost when service restart");
@@ -63,5 +66,14 @@ public class BugDaoTest {
         bug.setStatus("Verified");
         dao.save(bug);
         System.out.println("bug is updated: " +bug);
+    }
+
+    @Test
+    public void assignBug2Dev() {
+        bug=dao.findByIssueid(issueID);
+        System.out.println("developer for this bug is: " +bug.getAssignedev());
+        bug.setAssignedev(4);
+        dao.save(bug);
+        System.out.println("developer for this bug is: " +bug.getAssignedev()+". "+bug.getDeveloperByAssignedev().getDevname());
     }
 }

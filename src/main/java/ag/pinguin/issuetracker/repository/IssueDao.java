@@ -13,7 +13,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 public interface IssueDao<T extends Issue>{
-	T findByIssueid(Integer issueID);
+	T findByIssueid(String issueID);
 	List<T> findByAssignedev(String assigneDeveloper);
 	List<T> findByTitleLike(String title);
 	List<T> findByCreationdateBetween(Timestamp fromDate,Timestamp toDate);

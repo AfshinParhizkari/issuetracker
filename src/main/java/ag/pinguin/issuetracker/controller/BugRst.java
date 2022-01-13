@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/rst/bug")
@@ -44,11 +45,11 @@ public class BugRst {
                     examples = {
                             @ExampleObject(
                                     name = "All Bugs",
-                                    value = "{\"issueid\": null}",
+                                    value = "{\"issueid\": \"\"}",
                                     summary = "show all Bugs"),
                             @ExampleObject(
                                     name = "One Bug",
-                                    value = "{\"issueid\":1}",
+                                    value = "{\"issueid\":\"6b24ba48-52cd-4e1f-a2d7-beba1d7f456f\"}",
                                     summary = "show a Bug") }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "found the Bug", content = {
@@ -56,13 +57,42 @@ public class BugRst {
             @ApiResponse(responseCode = "400", description = "Invalid Bug", content = @Content),
             @ApiResponse(responseCode = "404", description = "Bug not found", content = @Content) })
     @PostMapping(value = "/find" ,consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
-    public String find(@RequestBody Bug bug) throws Exception {
+    public String findBug(@RequestBody Bug bug) throws Exception {
         List<Bug> returnData=new ArrayList<>();
-        if(bug.getIssueid()==null) {
+        if(bug.getIssueid().isEmpty()) {
             returnData = (dao.findAll());
         }else
             returnData.add(dao.findByIssueid(bug.getIssueid()));
         return (new ObjectMapper()).writeValueAsString(returnData);
+    }
+
+    @Operation(summary = "Assign a Bug to developer")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Examples for Assign a Bug",
+            required = true,
+            content = @io.swagger.v3.oas.annotations.media.Content (
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    examples = {
+                            @ExampleObject(
+                                    name = "Assign Bug",
+                                    value = "{\"issueid\":\"d534ff04-43c2-429e-b91f-deecf6210c32\","+
+                                            "\"assignedev\":1" +
+                                            "}",
+                                    summary = "Assign Bug") }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Bug is assigned"),
+            @ApiResponse(responseCode = "400", description = "Invalid Bug", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Bug not found", content = @Content) })
+    @PutMapping(value = "/assign",consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> assignBug(@RequestBody String receivedData) throws Exception {
+        JSONObject json = new JSONObject(receivedData);
+        String bugID=json.optString("issueid","");
+        Integer developerID=json.optInt("assignedev",1);
+        Bug bug =dao.findByIssueid(bugID);
+        bug.setAssignedev(developerID);
+        bug=dao.save(bug);
+        String response=(new ObjectMapper()).writeValueAsString(bug);
+        return new ResponseEntity<String>(response,HttpStatus.OK);
     }
 
     @Operation(summary = "Delete a Bug")
@@ -74,16 +104,16 @@ public class BugRst {
                     examples = {
                             @ExampleObject(
                                     name = "delete Bug",
-                                    value = "{\"issueid\":2}",
+                                    value = "{\"issueid\":\"06f007fb-cc1d-43a5-843f-8484660f71ff\"}",
                                     summary = "delete Bug") }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Bug is deleted"),
             @ApiResponse(responseCode = "400", description = "Invalid Bug", content = @Content),
             @ApiResponse(responseCode = "404", description = "Bug not found", content = @Content) })
     @DeleteMapping(value = "/delete",consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
-    public void delete(@RequestBody String receivedData) throws Exception {
+    public void deleteBug(@RequestBody String receivedData) throws Exception {
         JSONObject json = new JSONObject(receivedData);
-        Integer bugID=json.optInt("issueid",0);
+        String bugID=json.optString("issueid","");
         dao.deleteById(bugID);
     }
 
@@ -104,7 +134,7 @@ public class BugRst {
                                     summary = "create Bug"),
                             @ExampleObject(
                                     name = "update Bug",
-                                    value = "{\"issueid\":\"1\"," +
+                                    value = "{\"issueid\":\"6b24ba48-52cd-4e1f-a2d7-beba1d7f456f\"," +
                                             "\"title\":\"h2 db doesn't persist data\"," +
                                             "\"description\":\"we have data lost when service restart\"," +
                                             "\"priority\":\"Major\"," +
@@ -115,10 +145,11 @@ public class BugRst {
             @ApiResponse(responseCode = "200", description = "record is created"),
             @ApiResponse(responseCode = "400", description = "Invalid Bug name", content = @Content) })
     @PutMapping(value = "/save" ,consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
-    public String save(@Valid @RequestBody Bug bug) throws Exception {
+    public String upsertBug(@Valid @RequestBody Bug bug) throws Exception {
         String message="Error";
         Bug dbBug= dao.findByIssueid(bug.getIssueid());
         if(dbBug==null) {
+            bug.setIssueid(UUID.randomUUID().toString());
             bug=dao.save(bug);
             if(bug==null)
                 message= "{\"message\":\"Bug is Not added. some problem is occurred\"}";
