@@ -40,18 +40,18 @@ public class PlanStory {
         //how many task we can do for this time box(max<=capacity*developerCount) and select the tasks
         int developerCount=(int)devDao.count();
         Pageable currentWeekTasks =  PageRequest.of(0, capacity*developerCount, Sort.by("creationdate").descending());
-        List<Story> stories =dao.findByStatusNotContains(currentWeekTasks,StoryStatus.Completed).getContent();
-        //what is the developer load? example dev1 has 3 tasks
+        List<Story> stories =dao.findByStatusNotContains(currentWeekTasks,StoryStatus.Completed).getContent();//stories.size()<=capacity*developerCount
+        //how much is the developer load for this week? example Andre has 3 tasks, Afshin has 0, ...
         List<IssueDTO> devCapacities=PlanStory.convertArray2IssueDTO(dao.getCountOfDeveloperTasks());
         IssueDTO frestDev =  new IssueDTO();
-        //Assign the tasks for current week
-        for(int i=0;i< stories.size();i++){
-            Story story =stories.get(i);
-            if(story.getAssignedev()==null){
-                frestDev = Collections.min(devCapacities, Comparator.comparing(s -> s.getCount()));
-                if(frestDev.getAssignedev()<capacity) {
-                    stories.get(i).setAssignedev(frestDev.getAssignedev());
-                    devCapacities.get(devCapacities.indexOf(frestDev)).setCount(frestDev.getCount()+1);
+        //Assign the tasks for current week to developer with same load. condition: count of task for each dev<=capacity
+        for(int i=0;i< stories.size();i++){//All not complete tasks: max<=capacity*developerCount
+            Story story =stories.get(i);//select one
+            if(story.getAssignedev()==null){//have assigned it before?
+                frestDev = Collections.min(devCapacities, Comparator.comparing(s -> s.getCount()));//choose freest developer
+                if(frestDev.getAssignedev()<capacity) {//what about the capacity of developer? less than 10?
+                    stories.get(i).setAssignedev(frestDev.getAssignedev());//Assigned
+                    devCapacities.get(devCapacities.indexOf(frestDev)).setCount(frestDev.getCount()+1);//decrease dev capacity
                 }
             }
         }
