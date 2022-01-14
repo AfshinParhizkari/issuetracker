@@ -8,7 +8,7 @@ package ag.pinguin.issuetracker.controller;
  * Email:       Afshin.Parhizkari@gmail.com
  * Description:
  */
-import ag.pinguin.issuetracker.entity.Bug;
+import ag.pinguin.issuetracker.config.BasicData;
 import ag.pinguin.issuetracker.entity.BugStatus;
 import ag.pinguin.issuetracker.entity.Story;
 import ag.pinguin.issuetracker.repository.StoryDao;
@@ -183,6 +183,13 @@ public class StoryRst {
         return returnData;
     }
 
+    @Operation(summary = "Set Capacity for developers default is 10 stories per each developer ")
+    @GetMapping(value = "/setcapacity")
+    public Integer setCapacity(@RequestParam(required = false) Integer capacity) throws Exception {
+        if(capacity==null) capacity=10;
+        BasicData.capacity=capacity;
+        return BasicData.capacity;
+    }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(value= HttpStatus.INTERNAL_SERVER_ERROR)

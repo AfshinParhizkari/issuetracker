@@ -8,6 +8,7 @@ package ag.pinguin.issuetracker.service;
  * Email:       Afshin.Parhizkari@gmail.com
  * Description:
  */
+import ag.pinguin.issuetracker.config.BasicData;
 import ag.pinguin.issuetracker.entity.IssueDTO;
 import ag.pinguin.issuetracker.entity.Story;
 import ag.pinguin.issuetracker.entity.StoryStatus;
@@ -34,12 +35,11 @@ import java.util.List;
 public class PlanStory {
     @Autowired private StoryDao dao;
     @Autowired private DeveloperDao devDao;
-    final static int capacity=10;
 
     public List<Story> planStory() throws Exception{
         //how many task we can do for this time box(max<=capacity*developerCount) and select the tasks
         int developerCount=(int)devDao.count();
-        Pageable currentWeekTasks =  PageRequest.of(0, capacity*developerCount, Sort.by("creationdate").descending());
+        Pageable currentWeekTasks =  PageRequest.of(0, BasicData.capacity*developerCount, Sort.by("creationdate").descending());
         List<Story> stories =dao.findByStatusNotContains(currentWeekTasks,StoryStatus.Completed).getContent();//stories.size()<=capacity*developerCount
         //how much is the developer load for this week? example Andre has 3 tasks, Afshin has 0, ...
         List<IssueDTO> devCapacities=PlanStory.convertArray2IssueDTO(dao.getCountOfDeveloperTasks());
@@ -49,7 +49,7 @@ public class PlanStory {
             Story story =stories.get(i);//select one
             if(story.getAssignedev()==null){//have assigned it before?
                 frestDev = Collections.min(devCapacities, Comparator.comparing(s -> s.getCount()));//choose freest developer
-                if(frestDev.getAssignedev()<capacity) {//what about the capacity of developer? less than 10?
+                if(frestDev.getCount()<BasicData.capacity) {//what about the capacity of developer? less than 10?
                     stories.get(i).setAssignedev(frestDev.getAssignedev());//Assigned
                     devCapacities.get(devCapacities.indexOf(frestDev)).setCount(frestDev.getCount()+1);//decrease dev capacity
                 }
