@@ -1,10 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page isELIgnored="false"%>
 <%--
-  Created by IntelliJ IDEA.
-  User: afshin parhizkari
-  Date: 14/01/22
-  Time: 18:46 PM
+  @Project     Issue tracker
+  @Author      Afshin Parhizkari
+  @Date        2022 - 01 - 14
+  @Time        8:17 PM
+  Created by   IntelliJ IDEA.
+  Email:       Afshin.Parhizkari@gmail.com
+  Description:
 --%>
 <html>
 <head>
@@ -43,7 +46,16 @@
                     <a class="nav-link" href="http://localhost:8080/issue/api-json">API-JSON</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="http://localhost:8080/issue/rst/story/plan">Plan stories</a>
+                    <a class="nav-link" href="http://localhost:8080/issue/api/stories">Stories</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="http://localhost:8080/issue/rst/story/plan">Planning</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Bugs</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Developers</a>
                 </li>
             </ul>
         </div>
@@ -52,27 +64,26 @@
 <article>
     <br>
         there are three parts in this app:</br>
+        <ul>Story has six services:
+            <li>find</li>
+            <li>delete</li>
+            <li>upsert</li>
+            <li>setCapacity</li>
+            <li>change status</li>
+            <li>plan</li>
+        </ul>
+        <ul>Bug has five services:
+            <li>find</li>
+            <li>delete</li>
+            <li>upsert</li>
+            <li>assign</li>
+            <li>change status</li>
+        </ul>
         <ul>Developer has three services:
             <li>find</li>
             <li>delete</li>
             <li>upsert</li>
         </ul>
-    <ul>Bug has five services:
-        <li>find</li>
-        <li>delete</li>
-        <li>upsert</li>
-        <li>assign</li>
-        <li>change status</li>
-    </ul>
-    <ul>Story has six services:
-        <li>find</li>
-        <li>delete</li>
-        <li>upsert</li>
-        <li>setCapacity</li>
-        <li>change status</li>
-        <li>plan</li>
-    </ul>
-
     </section>
 </article>
 
