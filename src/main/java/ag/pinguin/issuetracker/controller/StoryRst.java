@@ -8,6 +8,8 @@ package ag.pinguin.issuetracker.controller;
  * Email:       Afshin.Parhizkari@gmail.com
  * Description:
  */
+import ag.pinguin.issuetracker.entity.Bug;
+import ag.pinguin.issuetracker.entity.BugStatus;
 import ag.pinguin.issuetracker.entity.Story;
 import ag.pinguin.issuetracker.repository.StoryDao;
 import ag.pinguin.issuetracker.service.PlanStory;
@@ -144,6 +146,43 @@ public class StoryRst {
     public String planStory() throws Exception {
         return (new ObjectMapper()).writeValueAsString(srv.planStory());
     }
+
+    @Operation(summary = "Change status to New, Estimated or Completed by issueID")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Examples for commit a change status",
+            required = true,
+            content = @io.swagger.v3.oas.annotations.media.Content (
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    examples = {
+                            @ExampleObject(
+                                    name = "change status New",
+                                    value = "{\"issueid\":\"aba0dba2-5b69-4f22-bbe9-d715402f0974\"," +
+                                            "\"status\":\"Completed\"" +
+                                            "}",
+                                    summary = "change status New"),
+                            @ExampleObject(
+                                    name = "change status Resolved",
+                                    value = "{\"issueid\":\"727e2463-f682-4389-97d2-f7e852feafce\"," +
+                                            "\"status\":\"New\"" +
+                                            "}",
+                                    summary = "Can not change Completed status") }))
+    @PostMapping(value = "/changestatus" ,consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
+    public String changeStatus(@RequestBody String receivedData) throws Exception {
+        String returnData="";
+        JSONObject json = new JSONObject(receivedData);
+        String bugID=json.optString("issueid","");
+        String status=json.optString("status","");
+        Story story = dao.findByIssueid(bugID);
+        if(status.isEmpty() || story.getStatus().equals("Completed"))
+            returnData="{\"message\":\""+ BugStatus.Verified+" status can't change. the task is closed\"}";
+        else {
+            story.setStatus(status);
+            story=dao.save(story);
+            returnData=(new ObjectMapper()).writeValueAsString(story);
+        }
+        return returnData;
+    }
+
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(value= HttpStatus.INTERNAL_SERVER_ERROR)

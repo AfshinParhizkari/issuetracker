@@ -9,6 +9,7 @@ package ag.pinguin.issuetracker.controller;
  * Description:
  */
 import ag.pinguin.issuetracker.entity.Bug;
+import ag.pinguin.issuetracker.entity.BugStatus;
 import ag.pinguin.issuetracker.repository.BugDao;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -164,6 +165,42 @@ public class BugRst {
             message= "{\"message\":\"Bug is updated\"}";
         }
         return message;
+    }
+
+    @Operation(summary = "Change status to New, Verified or Resolved by issueID")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Examples for commit a change status",
+            required = true,
+            content = @io.swagger.v3.oas.annotations.media.Content (
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    examples = {
+                            @ExampleObject(
+                                    name = "change status New",
+                                    value = "{\"issueid\":\"d534ff04-43c2-429e-b91f-deecf6210c32\"," +
+                                            "\"status\":\"Verified\"" +
+                                            "}",
+                                    summary = "change status New"),
+                            @ExampleObject(
+                                    name = "change status Resolved",
+                                    value = "{\"issueid\":\"6b24ba48-52cd-4e1f-a2d7-beba1d7f456f\"," +
+                                            "\"status\":\"New\"" +
+                                            "}",
+                                    summary = "Can not change Resolved status") }))
+    @PostMapping(value = "/changestatus" ,consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
+    public String changeStatus(@RequestBody String receivedData) throws Exception {
+        String returnData="";
+        JSONObject json = new JSONObject(receivedData);
+        String bugID=json.optString("issueid","");
+        String status=json.optString("status","");
+        Bug bug = dao.findByIssueid(bugID);
+        if(status.isEmpty() || bug.getStatus().equals("Resolved"))
+            returnData="{\"message\":\""+ BugStatus.Verified+" status can't change. the task is closed\"}";
+        else {
+            bug.setStatus(status);
+            bug=dao.save(bug);
+            returnData=(new ObjectMapper()).writeValueAsString(bug);
+        }
+        return returnData;
     }
 
     @ExceptionHandler(Exception.class)
