@@ -151,18 +151,21 @@ public class BugRst {
         Bug dbBug= dao.findByIssueid(bug.getIssueid());
         if(dbBug==null) {
             bug.setIssueid(UUID.randomUUID().toString());
+            bug.setStatus(BugStatus.New.toString());
             bug=dao.save(bug);
             if(bug==null)
                 message= "{\"message\":\"Bug is Not added. some problem is occurred\"}";
             else
                 message= "{\"message\":\"new Bug is added\"}";
         }else {
-            dbBug.setTitle(bug.getTitle());
-            dbBug.setDescription(bug.getDescription());
-            dbBug.setPriority(bug.getPriority());
-            dbBug.setStatus(bug.getStatus());
-            bug=dao.save(dbBug);
-            message= "{\"message\":\"Bug is updated\"}";
+            if(dbBug.getStatus().equals(BugStatus.Resolved)) message= "{\"message\":\"Bug is Resolved and closed\"}";
+            else {
+                dbBug.setTitle(bug.getTitle());
+                dbBug.setDescription(bug.getDescription());
+                dbBug.setPriority(bug.getPriority());
+                bug=dao.save(dbBug);
+                message= "{\"message\":\"Bug is updated\"}";
+            }
         }
         return message;
     }
@@ -194,7 +197,7 @@ public class BugRst {
         String status=json.optString("status","");
         Bug bug = dao.findByIssueid(bugID);
         if(status.isEmpty() || bug.getStatus().equals("Resolved"))
-            returnData="{\"message\":\""+ BugStatus.Verified+" status can't change. the task is closed\"}";
+            returnData="{\"message\":\""+ BugStatus.Resolved+" status can't change. the bug is closed\"}";
         else {
             bug.setStatus(status);
             bug=dao.save(bug);

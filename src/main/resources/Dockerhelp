@@ -1,0 +1,12 @@
+Build image:
+ cd ./issuetracker/
+ chmod 777 ./issuetracker.war
+docker build -t afshinparhizkari/myapp:issuetracker -f ./issuetracker/Dockerfile ./
+
+Container:
+ docker container run -itd --hostname issuetracker --name issue-tracker -p 8080:8080 afshinparhizkari/myapp:issuetracker
+
+Push to docker hub:
+ docker login --username=afshinparhizkari
+ docker tag issuetracker  afshinparhizkari/myapp:issuetracker
+ docker push afshinparhizkari/myapp:issuetracker

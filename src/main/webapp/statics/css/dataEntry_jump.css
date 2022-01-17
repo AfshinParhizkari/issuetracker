@@ -1,0 +1,26 @@
+div.is-quarter > div{
+    position: relative;
+}
+.form-control{
+    border: none;
+    background-color: #ececec;
+    border-bottom: 2px solid #4285f4;
+}
+div.is-quarter > div > label{
+    position: absolute;
+}
+label {
+    left: 0;
+    top: 0;
+    transition: 0.2s ease-out;
+}
+label.radio {
+    position: relative !important;
+}
+label.active {
+    color: #4285f4;
+    transform: translateY(-120%);
+}
+input:focus{
+    outline: none;
+}

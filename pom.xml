@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>ag.pinguin</groupId>
 	<artifactId>issuetracker</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1</version>
 	<name>issuetracker</name>
 	<description>Issue tracker for IT tasks</description>
 	<url>https://github.com/AfshinParhizkari/issuetracker.git</url>
@@ -42,6 +42,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<scope>compile</scope>
 		</dependency>
 		<!-- Embedded Tomcat start by Spring boot -->
 		<dependency>
@@ -111,6 +112,7 @@
 	</dependencies>
 
 	<build>
+		<finalName>issuetracker</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -126,5 +128,5 @@
 			</plugin>
 		</plugins>
 	</build>
-
+	<packaging>war</packaging>
 </project>

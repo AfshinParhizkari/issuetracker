@@ -11,6 +11,7 @@ package ag.pinguin.issuetracker.controller;
 import ag.pinguin.issuetracker.config.BasicData;
 import ag.pinguin.issuetracker.entity.BugStatus;
 import ag.pinguin.issuetracker.entity.Story;
+import ag.pinguin.issuetracker.entity.StoryStatus;
 import ag.pinguin.issuetracker.repository.StoryDao;
 import ag.pinguin.issuetracker.service.PlanStory;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -120,23 +121,26 @@ public class StoryRst {
             @ApiResponse(responseCode = "200", description = "record is created"),
             @ApiResponse(responseCode = "400", description = "Invalid story name", content = @Content) })
     @PutMapping(value = "/save" ,consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
-    public String saveStory(@Valid @RequestBody Story story) throws Exception {
+    public String upsertStory(@Valid @RequestBody Story story) throws Exception {
         String message="Error";
         Story dbstory= dao.findByIssueid(story.getIssueid());
         if(dbstory==null) {
             story.setIssueid(UUID.randomUUID().toString());
+            story.setStatus(StoryStatus.New.toString());
             story=dao.save(story);
             if(story==null)
                 message= "{\"message\":\"story is Not added. some problem is occurred\"}";
             else
                 message= "{\"message\":\"new story is added\"}";
         }else {
-            dbstory.setTitle(story.getTitle());
-            dbstory.setDescription(story.getDescription());
-            dbstory.setEstimatedpoint(story.getEstimatedpoint());
-            dbstory.setStatus(story.getStatus());
-            story=dao.save(dbstory);
-            message= "{\"message\":\"story is updated\"}";
+            if(dbstory.getStatus().equals(StoryStatus.Completed)) message=  "{\"message\":\"Story is Completed and closed\"}";
+            else{
+                dbstory.setTitle(story.getTitle());
+                dbstory.setDescription(story.getDescription());
+                dbstory.setEstimatedpoint(story.getEstimatedpoint());
+                story=dao.save(dbstory);
+                message= "{\"message\":\"story is updated\"}";
+            }
         }
         return message;
     }

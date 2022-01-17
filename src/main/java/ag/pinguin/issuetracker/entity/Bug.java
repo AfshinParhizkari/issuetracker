@@ -30,7 +30,7 @@ public class Bug extends Issue {
     }
 
     @Column(name = "status")
-    @NotEmpty(message = "status is required")
+    //@NotEmpty(message = "status is required")
     public String getStatus() {
         return status;
     }

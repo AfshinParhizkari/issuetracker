@@ -94,7 +94,8 @@
 				 "<td>"+story.description+"</td>"+
 				 "<td>"+story.estimatedpoint+"</td>"+
 				 "<td>"+story.creationdate+"</td>"+
-		 		 "<td>"+story.issueid+"</td></tr>";
+				 "<td><a href='${pageContext.request.contextPath}/api/story?issueid="+story.issueid+"'>"+story.issueid+"</a></td>"+
+		 		 "</tr>";
 	}
 	function ifEmpty(val){
 		return (val === undefined || val == null || val.length <= 0) ? "" : val;
@@ -116,7 +117,8 @@
 		<button class="btn btn-secondary float-start rfs" title="Search Story" onclick="getObjects()"><i class="fas fa-search"></i>&nbsp;</button>
 	</div>
 	</div>
-	<button class="btn btn-primary rfs" type="submit" title="Story"><i class="fa fa-pen-square"></i>&nbsp;</button>
+	<a type="button" class="btn btn-primary rfs" title="New story" href="${pageContext.request.contextPath}/api/story?issueid=" target="_self"><i class="fa fa-pen-square"></i>&nbsp;</a>
+	<a type="button" class="btn btn-outline-secondary rfs" title="close" href="${pageContext.request.contextPath}/" target="_self">&times;</a><br>
 <table id="table_id" class="display w-100 rfs">
     <thead><tr>
 		<th></th>

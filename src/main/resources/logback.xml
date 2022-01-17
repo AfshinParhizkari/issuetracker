@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="60 seconds" debug="true">
     <!-- Logging Properties     -->
+    <Property name="LOG_PATH" value="/var/log/issue" />
     <Property name="LOG_PATTERN" value="%d{yyyy-MM-dd' 'HH:mm:ss.SSSZ} %highlight(%-5level) [%thread, %X{X-B3-TraceId:-},%X{X-B3-SpanId:-}] %cyan(%C{0}.%M:%L) %yellow(%msg) %n"/>
    <!--___________________________ APPENDER__________________________________-->
     <appender name="consoleStudio" class="ch.qos.logback.core.ConsoleAppender">
@@ -8,8 +9,15 @@
                 <pattern>${LOG_PATTERN}</pattern>
         </encoder>
     </appender>
-   <!--________Set APPENDER ALL(TRACE(DEBUG(INFO(WARN(ERROR(FATAL(OFF)))))))_-->
+    <!--<appender name="fileDisposable" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_PATH}/issue.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>-->
+    <!--________Set APPENDER ALL(TRACE(DEBUG(INFO(WARN(ERROR(FATAL(OFF)))))))_-->
    	<root level="INFO">  
         <appender-ref ref="consoleStudio" />
-   	</root>
+        <!--<appender-ref ref="fileDisposable" />-->
+    </root>
 </configuration>

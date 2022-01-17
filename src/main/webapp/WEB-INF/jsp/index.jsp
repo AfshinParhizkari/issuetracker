@@ -30,33 +30,35 @@
 <header><p class="text-center">Welcome to Issue Planning application</p></header>
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
-        <a class="navbar-brand" href="http://localhost:8080/issue/h2/">H2 database</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    <a class="nav-link active" href="${pageContext.request.contextPath}/api-ui">API-UI</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="http://localhost:8080/issue/api-ui">API-UI</a>
+                    <a class="nav-link" href="${pageContext.request.contextPath}/api-json">API-JSON</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Story
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/api/stories">Stories</a></li>
+                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/api/story?issueid=">Create Story</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/rst/story/plan">Planning</a></li>
+                    </ul>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="http://localhost:8080/issue/api-json">API-JSON</a>
+                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Bug</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="http://localhost:8080/issue/api/stories">Stories</a>
+                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Developer</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="http://localhost:8080/issue/rst/story/plan">Planning</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Bugs</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Developers</a>
-                </li>
+                <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/h2/">H2 database</a></li>
             </ul>
         </div>
     </div>
@@ -65,28 +67,28 @@
     <br>
         there are three parts in this app:</br>
         <ul>Story has six services:
-            <li>find</li>
-            <li>delete</li>
-            <li>upsert</li>
-            <li>setCapacity</li>
-            <li>change status</li>
-            <li>plan</li>
+            <li>find: return All stories if the issueID be empty or One story via issueID</li>
+            <li>delete: delete a story via issueID</li>
+            <li>upsert: if the sent story object exist on db this service update it otherwise insert it</li>
+            <li>setCapacity: the default based on requirement is 10 task per developer. for better test you can change it</li>
+            <li>change status: developers can change status of stories but complete</li>
+            <li>plan: this service can assign the stories to developers</li>
         </ul>
         <ul>Bug has five services:
-            <li>find</li>
-            <li>delete</li>
-            <li>upsert</li>
-            <li>assign</li>
-            <li>change status</li>
+            <li>find: return All bugs if the issueID be empty or One story via issueID</li>
+            <li>delete: delete abug via issueID</li>
+            <li>upsert: if the sent bug object exist on db this service update it otherwise insert it</li>
+            <li>assign: developers can assign a bug to Themselves</li>
+            <li>change status: developers can change status of bugs but resolved</li>
         </ul>
         <ul>Developer has three services:
-            <li>find</li>
-            <li>delete</li>
-            <li>upsert</li>
+            <li>find: return All developers if the developerID be empty or One developer via developerID</li>
+            <li>delete: delete a developer via developerID</li>
+            <li>upsert: if the sent developer object exist on db this service update it otherwise insert it</li>
         </ul>
     </section>
-</article>
+</article><br>
 
-<footer class="navbar navbar-default navbar-fixed-bottom"><p>Created by Afshin Parhizkari</p></footer>
+<footer class="navbar navbar-default navbar-fixed-bottom"><p>Developed by Afshin Parhizkari</p></footer>
 </body>
 </html>
