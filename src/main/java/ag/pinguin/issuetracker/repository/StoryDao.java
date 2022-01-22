@@ -28,4 +28,10 @@ public interface StoryDao extends JpaRepository<Story,String>,IssueDao<Story>{
 	"(SELECT IFNULL(count(assignedev) ,0) from story where devid=assignedev and  status <> 'Completed' ) as count "+
 	"FROM developer", nativeQuery = true)
 	ArrayList<Object[]> getCountOfDeveloperTasks();
+
+	@Query(value = "SELECT devid as assignedev,"+
+			"(SELECT IFNULL(sum(estimatedpoint) ,0) from story where devid=assignedev and  status <> 'Completed' ) as capacity "+
+			"FROM developer", nativeQuery = true)
+	ArrayList<Object[]> getSumOfDeveloperEPV();
+
 }

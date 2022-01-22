@@ -14,17 +14,11 @@ import ag.pinguin.issuetracker.entity.Story;
 import ag.pinguin.issuetracker.entity.StoryStatus;
 import ag.pinguin.issuetracker.repository.DeveloperDao;
 import ag.pinguin.issuetracker.repository.StoryDao;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,26 +26,46 @@ import java.util.Comparator;
 import java.util.List;
 
 @Service
-public class PlanStory {
+public class PlanningSrv {
     @Autowired private StoryDao dao;
     @Autowired private DeveloperDao devDao;
 
-    public List<Story> planStory() throws Exception{
+    public List<Story> planCurrentSprint() throws Exception{
+        List<Story> stories =dao.findByStatusNotContains(StoryStatus.Completed);
+        //how much is the developer load(EPV) for this week? example Andre=5 ehsan=4 hossein=0 afshin=6 , ...
+        List<IssueDTO> devCapacities= PlanningSrv.convertArray2IssueDTO(dao.getSumOfDeveloperEPV());
+        IssueDTO firstDev;
+        //Assign the tasks for current sprint to developer with same load. condition: count of task for each dev<=capacity(epv sum)
+        for(int i=0;i< stories.size();i++){ //All not complete tasks
+            Story story =stories.get(i);//select one
+            if(story.getAssignedev()==null){ //have assigned it before?
+                firstDev = Collections.min(devCapacities, Comparator.comparing(s -> s.getCapacity()));//chose developer with minimum capacity(EPV)
+                if(firstDev.getCapacity()+stories.get(i).getEstimatedpoint()<=BasicData.capacity) {//what about the capacity of developer(EPV)? less than 10?
+                    stories.get(i).setAssignedev(firstDev.getAssignedev());//Assigned
+                    devCapacities.get(devCapacities.indexOf(firstDev)).setCapacity(firstDev.getCapacity()+stories.get(i).getEstimatedpoint());//decrease dev capacity(EPV)
+                }
+            }
+        }
+        dao.saveAll(stories);
+        return stories;
+    }
+
+    public List<Story> planOldWay() throws Exception{
         //how many task we can do for this time box(max<=capacity*developerCount) and select the tasks
         int developerCount=(int)devDao.count();
-        Pageable currentWeekTasks =  PageRequest.of(0, BasicData.capacity*developerCount, Sort.by("creationdate").descending());
+        Pageable currentWeekTasks =  PageRequest.of(0, BasicData.capacity*developerCount, Sort.by("creationdate").ascending());
         List<Story> stories =dao.findByStatusNotContains(currentWeekTasks,StoryStatus.Completed).getContent();//stories.size()<=capacity*developerCount
         //how much is the developer load for this week? example Andre has 3 tasks, Afshin has 0, ...
-        List<IssueDTO> devCapacities=PlanStory.convertArray2IssueDTO(dao.getCountOfDeveloperTasks());
-        IssueDTO frestDev =  new IssueDTO();
+        List<IssueDTO> devCapacities= PlanningSrv.convertArray2IssueDTO(dao.getCountOfDeveloperTasks());
+        IssueDTO firstDev =  new IssueDTO();
         //Assign the tasks for current week to developer with same load. condition: count of task for each dev<=capacity
         for(int i=0;i< stories.size();i++){//All not complete tasks: max<=capacity*developerCount
             Story story =stories.get(i);//select one
             if(story.getAssignedev()==null){//have assigned it before?
-                frestDev = Collections.min(devCapacities, Comparator.comparing(s -> s.getCount()));//choose freest developer
-                if(frestDev.getCount()<BasicData.capacity) {//what about the capacity of developer? less than 10?
-                    stories.get(i).setAssignedev(frestDev.getAssignedev());//Assigned
-                    devCapacities.get(devCapacities.indexOf(frestDev)).setCount(frestDev.getCount()+1);//decrease dev capacity
+                firstDev = Collections.min(devCapacities, Comparator.comparing(s -> s.getCapacity()));//choose freest developer
+                if(firstDev.getCapacity()<BasicData.capacity) {//what about the capacity of developer? less than 10?
+                    stories.get(i).setAssignedev(firstDev.getAssignedev());//Assigned
+                    devCapacities.get(devCapacities.indexOf(firstDev)).setCapacity(firstDev.getCapacity()+1);//decrease dev capacity
                 }
             }
         }
@@ -69,12 +83,4 @@ public class PlanStory {
             return null;
         }
     }
-
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(value= HttpStatus.INTERNAL_SERVER_ERROR)
-    @ResponseBody
-    public ResponseEntity<Object> generalException(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ExceptionUtils.getRootCause(ex).getMessage());
-    }
-
 }

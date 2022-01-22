@@ -16,6 +16,6 @@ import lombok.*;
 @ToString
 public class IssueDTO {
     public Integer assignedev;
-    public Integer count;
+    public Integer capacity;
 
 }

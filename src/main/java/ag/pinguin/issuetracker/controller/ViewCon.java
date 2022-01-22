@@ -1,16 +1,4 @@
 package ag.pinguin.issuetracker.controller;
-
-import ag.pinguin.issuetracker.entity.Story;
-import ag.pinguin.issuetracker.repository.StoryDao;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Optional;
-
 /**
  * @Project issuetracker
  * @Author Afshin Parhizkari
@@ -20,6 +8,15 @@ import java.util.Optional;
  * Email:       Afshin.Parhizkari@gmail.com
  * Description:
  */
+import ag.pinguin.issuetracker.entity.Story;
+import ag.pinguin.issuetracker.repository.StoryDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import java.util.Optional;
+
 @Controller
 @RequestMapping("/api")
 public class ViewCon {
@@ -36,5 +33,4 @@ public class ViewCon {
         modelMap.addAttribute("story",story);
         return "story";
     }
-
 }

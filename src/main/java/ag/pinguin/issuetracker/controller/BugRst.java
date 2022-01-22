@@ -10,9 +10,13 @@ package ag.pinguin.issuetracker.controller;
  */
 import ag.pinguin.issuetracker.entity.Bug;
 import ag.pinguin.issuetracker.entity.BugStatus;
-import ag.pinguin.issuetracker.repository.BugDao;
+import ag.pinguin.issuetracker.entity.Developer;
+import ag.pinguin.issuetracker.entity.StoryStatus;
+import ag.pinguin.issuetracker.service.BugSrv;
+import ag.pinguin.issuetracker.service.DeveloperSrv;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -27,44 +31,35 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/rst/bug")
-@Tag(name = "Bug",description = "Bug info can show and change via this rest service")
+@RequestMapping("/rst/bugs")
+@Tag(name = "Bug",description = "This service can show bug information and change it")
 public class BugRst {
-    @Autowired private BugDao dao;
+    @Autowired private BugSrv srv;
+    @Autowired private DeveloperSrv devSrv;
 
-    @Operation(summary = "Get a Bug by issueID")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Examples for get Bug(s)",
-            required = true,
-            content = @io.swagger.v3.oas.annotations.media.Content (
-                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    examples = {
-                            @ExampleObject(
-                                    name = "All Bugs",
-                                    value = "{\"issueid\": \"\"}",
-                                    summary = "show all Bugs"),
-                            @ExampleObject(
-                                    name = "One Bug",
-                                    value = "{\"issueid\":\"6b24ba48-52cd-4e1f-a2d7-beba1d7f456f\"}",
-                                    summary = "show a Bug") }))
+    @Operation(summary = "Set the issueID field to Get a bug or don't set to show all bugs")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "found the Bug", content = {
+            @ApiResponse(responseCode = "200", description = "found the bug(s)", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = Bug.class))}),
-            @ApiResponse(responseCode = "400", description = "Invalid Bug", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Bug not found", content = @Content) })
-    @PostMapping(value = "/find" ,consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
-    public String findBug(@RequestBody Bug bug) throws Exception {
-        List<Bug> returnData=new ArrayList<>();
-        if(bug.getIssueid().isEmpty()) {
-            returnData = (dao.findAll());
-        }else
-            returnData.add(dao.findByIssueid(bug.getIssueid()));
-        return (new ObjectMapper()).writeValueAsString(returnData);
+            @ApiResponse(responseCode = "500", description = "Internal error", content = @Content) })
+    @Parameter(name = "issueID",description = "A string identifier", example = "6b24ba48-52cd-4e1f-a2d7-beba1d7f456f")
+    @GetMapping(value = "/" ,produces = MediaType.APPLICATION_JSON_VALUE)
+    public String findBugs(@RequestParam(required = false,defaultValue = "") String issueID) throws Exception {
+        return (new ObjectMapper()).writeValueAsString(srv.findBugs(issueID));
+    }
+
+    @Operation(summary = "Set the issueID field to Delete a bug")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Bug is deleted"),
+            @ApiResponse(responseCode = "500", description = "Internal error", content = @Content) })
+    @Parameter(name = "issueID",description = "A string identifier", example = "06f007fb-cc1d-43a5-843f-8484660f71ff")
+    @DeleteMapping(value = "/",produces = MediaType.APPLICATION_JSON_VALUE)
+    public String deleteBug(@RequestParam String issueID) throws Exception {
+        srv.deleteBug(issueID);
+        return String.format("{\"message\":\"issueID %s is deleted\"}",issueID);
     }
 
     @Operation(summary = "Assign a Bug to developer")
@@ -75,102 +70,30 @@ public class BugRst {
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     examples = {
                             @ExampleObject(
-                                    name = "Assign Bug",
+                                    name = "Assign developer to bug",
                                     value = "{\"issueid\":\"d534ff04-43c2-429e-b91f-deecf6210c32\","+
                                             "\"assignedev\":1" +
                                             "}",
-                                    summary = "Assign Bug") }))
+                                    summary = "Assign developer to bug") }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Bug is assigned"),
-            @ApiResponse(responseCode = "400", description = "Invalid Bug", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Bug not found", content = @Content) })
-    @PutMapping(value = "/assign",consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> assignBug(@RequestBody String receivedData) throws Exception {
+            @ApiResponse(responseCode = "500", description = "Internal error", content = @Content) })
+    @PutMapping(value = "/assignment",consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> assignBug(@RequestBody String receivedData) throws Exception {//Also you can use DTO obj
         JSONObject json = new JSONObject(receivedData);
         String bugID=json.optString("issueid","");
         Integer developerID=json.optInt("assignedev",1);
-        Bug bug =dao.findByIssueid(bugID);
-        bug.setAssignedev(developerID);
-        bug=dao.save(bug);
-        String response=(new ObjectMapper()).writeValueAsString(bug);
-        return new ResponseEntity<String>(response,HttpStatus.OK);
+        Bug bug =srv.findBug(bugID);
+        Developer developer=devSrv.findDeveloper(developerID);
+        String message;
+        if(bug==null || developer==null || bug.getIssueid()==null || developer.getDevid()==null || bug.getStatus().equals(BugStatus.Resolved.toString()))
+            message= "{\"message\":\"Bug or Developer is not found Or status was Resolved\"}";
+        else
+            message = (new ObjectMapper()).writeValueAsString(srv.assignBug(bug,developer));
+        return new ResponseEntity<String>(message,HttpStatus.OK);
     }
 
-    @Operation(summary = "Delete a Bug")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Examples for delete a Bug",
-            required = true,
-            content = @io.swagger.v3.oas.annotations.media.Content (
-                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    examples = {
-                            @ExampleObject(
-                                    name = "delete Bug",
-                                    value = "{\"issueid\":\"06f007fb-cc1d-43a5-843f-8484660f71ff\"}",
-                                    summary = "delete Bug") }))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Bug is deleted"),
-            @ApiResponse(responseCode = "400", description = "Invalid Bug", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Bug not found", content = @Content) })
-    @DeleteMapping(value = "/delete",consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
-    public void deleteBug(@RequestBody String receivedData) throws Exception {
-        JSONObject json = new JSONObject(receivedData);
-        String bugID=json.optString("issueid","");
-        dao.deleteById(bugID);
-    }
-
-    @Operation(summary = "create or update a Bug by issueID")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Examples for create new Bug",
-            required = true,
-            content = @io.swagger.v3.oas.annotations.media.Content (
-                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    examples = {
-                            @ExampleObject(
-                                    name = "create new Bug",
-                                    value = "{\"title\":\"ui interface\"," +
-                                            "\"description\":\"responsive does not working in mobile devices\"," +
-                                            "\"priority\":\"Minor\"," +
-                                            "\"status\":\"New\"" +
-                                            "}",
-                                    summary = "create Bug"),
-                            @ExampleObject(
-                                    name = "update Bug",
-                                    value = "{\"issueid\":\"6b24ba48-52cd-4e1f-a2d7-beba1d7f456f\"," +
-                                            "\"title\":\"h2 db doesn't persist data\"," +
-                                            "\"description\":\"we have data lost when service restart\"," +
-                                            "\"priority\":\"Major\"," +
-                                            "\"status\":\"Verified\"" +
-                                            "}",
-                                    summary = "update Bug") }))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "record is created"),
-            @ApiResponse(responseCode = "400", description = "Invalid Bug name", content = @Content) })
-    @PutMapping(value = "/save" ,consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
-    public String upsertBug(@Valid @RequestBody Bug bug) throws Exception {
-        String message="Error";
-        Bug dbBug= dao.findByIssueid(bug.getIssueid());
-        if(dbBug==null) {
-            bug.setIssueid(UUID.randomUUID().toString());
-            bug.setStatus(BugStatus.New.toString());
-            bug=dao.save(bug);
-            if(bug==null)
-                message= "{\"message\":\"Bug is Not added. some problem is occurred\"}";
-            else
-                message= "{\"message\":\"new Bug is added\"}";
-        }else {
-            if(dbBug.getStatus().equals(BugStatus.Resolved)) message= "{\"message\":\"Bug is Resolved and closed\"}";
-            else {
-                dbBug.setTitle(bug.getTitle());
-                dbBug.setDescription(bug.getDescription());
-                dbBug.setPriority(bug.getPriority());
-                bug=dao.save(dbBug);
-                message= "{\"message\":\"Bug is updated\"}";
-            }
-        }
-        return message;
-    }
-
-    @Operation(summary = "Change status to New, Verified or Resolved by issueID")
+    @Operation(summary = "Change status to New, Verified or Resolved via issueID")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "Examples for commit a change status",
             required = true,
@@ -178,38 +101,103 @@ public class BugRst {
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     examples = {
                             @ExampleObject(
-                                    name = "change status New",
+                                    name = "Correct. status:{New,Verified,Resolved}",
                                     value = "{\"issueid\":\"d534ff04-43c2-429e-b91f-deecf6210c32\"," +
                                             "\"status\":\"Verified\"" +
                                             "}",
-                                    summary = "change status New"),
+                                    summary ="Change status to New"),
                             @ExampleObject(
-                                    name = "change status Resolved",
+                                    name = "Incorrect. status:{New,Verified,Resolved}",
                                     value = "{\"issueid\":\"6b24ba48-52cd-4e1f-a2d7-beba1d7f456f\"," +
                                             "\"status\":\"New\"" +
                                             "}",
                                     summary = "Can not change Resolved status") }))
-    @PostMapping(value = "/changestatus" ,consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "500", description = "Internal error", content = @Content) })
+    @PutMapping(value = "/status" ,consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
     public String changeStatus(@RequestBody String receivedData) throws Exception {
-        String returnData="";
+        String message="";
         JSONObject json = new JSONObject(receivedData);
         String bugID=json.optString("issueid","");
-        String status=json.optString("status","");
-        Bug bug = dao.findByIssueid(bugID);
-        if(status.isEmpty() || bug.getStatus().equals("Resolved"))
-            returnData="{\"message\":\""+ BugStatus.Resolved+" status can't change. the bug is closed\"}";
+        BugStatus status=BugStatus.valueOf(json.optString("status",""));
+        Bug bug = srv.findBug(bugID);
+        if(bug==null || status==null || bug.getIssueid()==null || bug.getStatus().equals(BugStatus.Resolved.toString()))
+            message= "{\"message\":\"bug or status is not found or status was Resolved\"}";
+        else
+            message = (new ObjectMapper()).writeValueAsString(srv.changeStatus(bug,status));
+        return message;
+    }
+
+    @Operation(summary = "create a new Bug")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Examples for create new bug",
+            required = true,
+            content = @io.swagger.v3.oas.annotations.media.Content (
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    examples = {
+                            @ExampleObject(
+                                    name = "priority:{Critical,Major,Minor}",
+                                    value = "{\"title\":\"ui interface\"," +
+                                            "\"description\":\"responsive does not working in mobile devices\"," +
+                                            "\"priority\":\"Minor\"" +
+                                            "}",
+                                    summary = "Create a new bug") }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "record is created"),
+            @ApiResponse(responseCode = "500", description = "Internal error", content = @Content) })
+    @PostMapping(value = "/" ,consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
+    public String saveBug(@Valid @RequestBody Bug bug) throws Exception {
+        String message;
+        Bug dbbug= srv.findBug(bug.getIssueid());
+        if(dbbug==null || dbbug.getIssueid()==null) {
+            bug.setIssueid(UUID.randomUUID().toString());
+            bug.setStatus(BugStatus.New.toString());
+            bug=srv.upsertBug(bug);
+            if(bug==null) message= "{\"message\":\"bug is not added. some problem is occurred.\"}";
+            else message= (new ObjectMapper()).writeValueAsString(bug);
+        }else message= String.format("{\"message\":\"issueID %s is already exist.\"}",bug.getIssueid());
+        return message;
+    }
+
+    @Operation(summary = "Update a bug via issueID")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Examples for update a bug",
+            required = true,
+            content = @io.swagger.v3.oas.annotations.media.Content (
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    examples = {
+                            @ExampleObject(
+                                    name = "priority:{Critical,Major,Minor}",
+                                    value = "{\"issueid\":\"06f007fb-cc1d-43a5-843f-8484660f71ff\"," +
+                                            "\"title\":\"h2 db doesn't persist data\"," +
+                                            "\"description\":\"we have data lost when service restart\"," +
+                                            "\"priority\":\"Major\"" +
+                                            "}",
+                                    summary = "update a bug via issueID") }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "record is updated"),
+            @ApiResponse(responseCode = "500", description = "Internal error", content = @Content) })
+    @PutMapping(value = "/" ,consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
+    public String updateBug(@Valid @RequestBody Bug bug) throws Exception {
+        String message;
+        Bug dbBug= srv.findBug(bug.getIssueid());
+        if(dbBug==null || dbBug.getIssueid()==null || dbBug.getStatus().equals(BugStatus.Verified.toString()))
+            message=String.format("{\"message\":\"issueID %s is not found to update Or Status was completed.\"}",bug.getIssueid());
         else {
-            bug.setStatus(status);
-            bug=dao.save(bug);
-            returnData=(new ObjectMapper()).writeValueAsString(bug);
+            dbBug.setTitle(bug.getTitle());
+            dbBug.setDescription(bug.getDescription());
+            dbBug.setPriority(bug.getPriority());
+            bug=srv.upsertBug(dbBug);
+            message= (new ObjectMapper()).writeValueAsString(bug);
         }
-        return returnData;
+        return message;
     }
 
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(value= HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(value=HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
-    public ResponseEntity<Object> generalException(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ExceptionUtils.getRootCause(ex).getMessage());
+    public String generalException(Exception ex) {
+        return "{\"message\":\""+ExceptionUtils.getRootCause(ex).getMessage().replace("\"","").replace("\n", "")+"\"}";
     }
 }

@@ -4,7 +4,7 @@ import ag.pinguin.issuetracker.IssuetrackerApplication;
 import ag.pinguin.issuetracker.entity.IssueDTO;
 import ag.pinguin.issuetracker.entity.Story;
 import ag.pinguin.issuetracker.entity.StoryStatus;
-import ag.pinguin.issuetracker.service.PlanStory;
+import ag.pinguin.issuetracker.service.PlanningSrv;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 /**
  * @Project issuetracker
@@ -79,10 +78,10 @@ public class StoryDaoTest {
 
     @Test
     public void findFreestDeveloper() {
-        List<IssueDTO> devCapacities=PlanStory.convertArray2IssueDTO(dao.getCountOfDeveloperTasks());
+        List<IssueDTO> devCapacities= PlanningSrv.convertArray2IssueDTO(dao.getCountOfDeveloperTasks());
         devCapacities.forEach(System.out::println);
 
-        IssueDTO issueDTO =  Collections.min(devCapacities, Comparator.comparing(s -> s.getCount()));
+        IssueDTO issueDTO =  Collections.min(devCapacities, Comparator.comparing(s -> s.getCapacity()));
         System.out.println("The freest developer is : " + issueDTO);
     }
 
