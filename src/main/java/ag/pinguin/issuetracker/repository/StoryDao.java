@@ -21,7 +21,7 @@ import java.util.List;
 public interface StoryDao extends JpaRepository<Story,String>,IssueDao<Story>{
 	Page<Story> findByStatusNotContains(Pageable pageable,StoryStatus status);
 	List<Story> findByEstimatedpoint(Integer estimatedPointValue);
-	List<Story> findByStatusNotContains(StoryStatus status);
+	List<Story> findByStatusNotContainsOrderByEstimatedpoint(StoryStatus status);
 	long countByStatusNotContains(StoryStatus status);
 
 	@Query(value = "SELECT devid as assignedev,"+
@@ -30,8 +30,16 @@ public interface StoryDao extends JpaRepository<Story,String>,IssueDao<Story>{
 	ArrayList<Object[]> getCountOfDeveloperTasks();
 
 	@Query(value = "SELECT devid as assignedev,"+
-			"(SELECT IFNULL(sum(estimatedpoint) ,0) from story where devid=assignedev and  status <> 'Completed' ) as capacity "+
+			"(SELECT IFNULL(sum(estimatedpoint) ,0) from story where devid=assignedev and  status <> 'Completed') as capacity "+
 			"FROM developer", nativeQuery = true)
 	ArrayList<Object[]> getSumOfDeveloperEPV();
+
+	@Query(value = "SELECT devid as assignedev,"+
+			"(SELECT IFNULL(sum(estimatedpoint) ,0) from story where devid=assignedev and  status <> 'Completed' and sprint=:sprint ) as capacity "+
+			"FROM developer", nativeQuery = true)
+	ArrayList<Object[]> getSumOfDeveloperEPV(Integer sprint);
+
+	@Query(value = "SELECT IFNULL(max(sprint) ,0) from story", nativeQuery = true)
+	Integer getMaxSprint();
 
 }

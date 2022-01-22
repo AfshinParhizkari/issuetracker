@@ -169,16 +169,22 @@ public class StoryRst {
         return BasicData.capacity;
     }
 
-    @Operation(summary = "Plan all unassigned stories(max:10* dev-Count) for current week to developers")
+    @Operation(summary = "Plan by count of story. this is a wrong way planning")
     @GetMapping(value = "/plan/old" ,produces = MediaType.APPLICATION_JSON_VALUE)
     public String planOldWay() throws Exception {
         return (new ObjectMapper()).writeValueAsString(planningSrv.planOldWay());
     }
 
-    @Operation(summary = "Plan all unassigned stories(max:10* dev-Count) for current week to developers")
+    @Operation(summary = "Plan just current sprint(week). other stories are Epic and when developer commit the story we can plan again")
     @GetMapping(value = "/plan/sprint" ,produces = MediaType.APPLICATION_JSON_VALUE)
     public String planCurrentSprint() throws Exception {
         return (new ObjectMapper()).writeValueAsString(planningSrv.planCurrentSprint());
+    }
+
+    @Operation(summary = "Plan all unassigned and uncompleted stories for sprints")
+    @GetMapping(value = "/plan" ,produces = MediaType.APPLICATION_JSON_VALUE)
+    public String planAllSprint() throws Exception {
+        return (new ObjectMapper()).writeValueAsString(planningSrv.planAllSprints());
     }
 
     @ExceptionHandler(Exception.class)

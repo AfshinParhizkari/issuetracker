@@ -22,31 +22,45 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/statics/css/dataEntry_jump.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/statics/fonts/font.css">
 <script > /* Send Data to controller */
-    function saveData() {
+    function upsertData() {
         let story = {};
         story['issueid'] = $('#issuepk').val();
         story['title'] = $('#titleid').val();
         story['description'] = $('#descriptionid').val();
         story['estimatedpoint'] = $('#epvid').val();
-        jQuery.ajax({
-            url:'${pageContext.request.contextPath}/rst/story/save',
-            type:'put',
-            contentType:'application/json; charset=utf-8',
-            data:JSON.stringify(story),
-            success: function(){//xhr.responseText
-                alert("Story is persisted");
-            },
-            error: function (){
-                alert("Story could not persist");
-            }
-        });
+        if(story['issueid']==""){
+            jQuery.ajax({
+                url:'${pageContext.request.contextPath}/rst/stories/',
+                type:'post',
+                contentType:'application/json; charset=utf-8',
+                data:JSON.stringify(story),
+                success: function(){//xhr.responseText
+                    alert("Story is inserted");
+                },
+                error: function (){
+                    alert("Story could not insert");
+                }
+            });
+        }else {
+            jQuery.ajax({
+                url:'${pageContext.request.contextPath}/rst/stories/',
+                type:'put',
+                contentType:'application/json; charset=utf-8',
+                data:JSON.stringify(story),
+                success: function(){//xhr.responseText
+                    alert("Story is updated");
+                },
+                error: function (){
+                    alert("Story could not update");
+                }
+            });
+        }
     }
     function deleteData() {
     jQuery.ajax({
-        url:'${pageContext.request.contextPath}/rst/story/delete',
+        url:'${pageContext.request.contextPath}/rst/stories/',
         type:'delete',
-        contentType:'application/json; charset=utf-8',
-        data:JSON.stringify({issueid: $('#issuepk').val()}),
+        data:{issueID: $('#issuepk').val()},
         success: function(){//xhr.responseText
             alert("Story is deleted");
         },
@@ -63,7 +77,7 @@
     <div class="my-5"><input class="form-control rfs" title="enter the title of story" type="text" value="${story.title}" id="titleid"/><label class="rfs" for="titleid">Title</label></div>
     <div class="my-5"><input class="form-control rfs" title="enter the description of story" type="text" value="${story.description}" id="descriptionid"/><label class="rfs" for="descriptionid">Description</label></div>
     <div class="my-5"><input class="form-control rfs" title="enter the estimated point value of story" type="number" value="${story.estimatedpoint}" id="epvid"/><label class="rfs" for="epvid">Estimated Point Value</label></div>
-    <button class="btn btn-outline-primary mx-2 float-start rfs" id="save" title="Save" onclick="saveData()"><i class="fa fa-save"></i>&nbsp;</button>
+    <button class="btn btn-outline-primary mx-2 float-start rfs" id="save" title="Save" onclick="upsertData()"><i class="fa fa-save"></i>&nbsp;</button>
     <button id="delete" class="btn btn-outline-warning float-start rfs" title="Delete" onclick="deleteData()"><i class="fa fa-trash"></i>&nbsp;</button>
     <a type="button" class="btn btn-outline-secondary mx-2 rfs" title="close" href="${pageContext.request.contextPath}/api/stories" target="_self">&times;</a><br>
 </div>

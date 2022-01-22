@@ -49,7 +49,7 @@
                         <li><a class="dropdown-item" href="${pageContext.request.contextPath}/api/stories">Stories</a></li>
                         <li><a class="dropdown-item" href="${pageContext.request.contextPath}/api/story?issueid=">Create Story</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/rst/story/plan">Planning</a></li>
+                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/rst/stories/plan">Planning</a></li>
                     </ul>
                 </li>
                 <li class="nav-item">
@@ -66,25 +66,29 @@
 <article>
     <br>
         there are three parts in this app:</br>
-        <ul>Story has six services:
-            <li>find: return All stories if the issueID be empty or One story via issueID</li>
-            <li>delete: delete a story via issueID</li>
-            <li>upsert: if the sent story object exist on db this service update it otherwise insert it</li>
-            <li>setCapacity: the default based on requirement is 10 task per developer. for better test you can change it</li>
-            <li>change status: developers can change status of stories but complete</li>
-            <li>plan: this service can assign the stories to developers</li>
+        <ul>Story has seven services:
+            <li>X:GET: return All stories if the issueID be empty or One story via issueID</li>
+            <li>X:GET /capacity: the default based on requirement is 10 epv per developer. for better test you can change it</li>
+            <li>X:DELETE: delete a story via issueID</li>
+            <li>X:POST: new story insert in h2 database</li>
+            <li>X:PUT: current story update in h2 database</li>
+            <li>X:PUT: /status: developers can change status of stories but completed</li>
+            <li>X:GET: /plan: this service can assign the stories to developers in different sprints</li>
         </ul>
-        <ul>Bug has five services:
-            <li>find: return All bugs if the issueID be empty or One story via issueID</li>
-            <li>delete: delete abug via issueID</li>
-            <li>upsert: if the sent bug object exist on db this service update it otherwise insert it</li>
-            <li>assign: developers can assign a bug to Themselves</li>
-            <li>change status: developers can change status of bugs but resolved</li>
+        <ul>Bug has six services:
+            <li>X:GET: return All bugs if the issueID be empty or One bug via issueID</li>
+            <li>X:DELETE: delete a bug via issueID</li>
+            <li>X:POST: new bug insert in h2 database</li>
+            <li>X:PUT: current bug update in h2 database</li>
+            <li>X:PUT: /status: developers can change status of bugs but resolved</li>
+            <li>X:PUT: /assignment: developers can assign bug to themselves but resolved</li>
         </ul>
-        <ul>Developer has three services:
-            <li>find: return All developers if the developerID be empty or One developer via developerID</li>
-            <li>delete: delete a developer via developerID</li>
-            <li>upsert: if the sent developer object exist on db this service update it otherwise insert it</li>
+        <ul>Developer has five services:
+            <li>X:GET: return All developers if the devID be empty or One developer via devID</li>
+            <li>X:GET: /load: fill sprint number that return all developer's load</li>
+            <li>X:DELETE: delete a developer via devID</li>
+            <li>X:POST: new developer insert in h2 database</li>
+            <li>X:PUT: current developer update in h2 database</li>
         </ul>
     </section>
 </article><br>

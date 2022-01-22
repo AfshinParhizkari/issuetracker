@@ -36,7 +36,7 @@
 			deferRender: true,
 			info: false,
 			initComplete: function () {
-				this.api().columns([1, 2]).every(function () {
+				this.api().columns([1, 2, 8]).every(function () {
 					let column = this;
 					let select = $('<select><option value=""></option></select>')
 							.appendTo($(column.footer()).empty())
@@ -60,10 +60,9 @@
 	let stories;
 	function getObjects() {
 		jQuery.ajax({
-			url:'${pageContext.request.contextPath}/rst/story/find',
-			type:'post',
-			contentType:'application/json; charset=utf-8',
-			data:JSON.stringify({issueid: $('#pkey').val()}),
+			url:'${pageContext.request.contextPath}/rst/stories/',
+			type:'get',
+			data:{issueID: $('#pkey').val()},
 			success: function(stories){
 				let tableBlock = document.getElementById('table_body_id');
 				// Clear table body to put new records
@@ -74,15 +73,8 @@
 					tableBlock.innerHTML = tableBlock.innerHTML+createColumn(stories[i]);
 				dtLoad();
 			},
-			error: function (returnErr){
-				let alertMSG="";
-				let objError=returnErr['responseJSON'];
-				if(objError["errors"]){
-					for(let i=0;i<objError["errors"].length;i++)
-						alertMSG+= objError["errors"][i]["message"]+" \n";
-					alertMsg("status: "+objError["status"]+"\n"+alertMSG);
-				}else
-					alertMsg("status: "+objError["status"]+"\n"+objError["message"]);
+			error: function (){
+				alert("Stories could not fetch");
 			}
 		})
 	}
@@ -94,6 +86,7 @@
 				 "<td>"+story.description+"</td>"+
 				 "<td>"+story.estimatedpoint+"</td>"+
 				 "<td>"+story.creationdate+"</td>"+
+				 "<td>"+story.sprint+"</td>"+
 				 "<td><a href='${pageContext.request.contextPath}/api/story?issueid="+story.issueid+"'>"+story.issueid+"</a></td>"+
 		 		 "</tr>";
 	}
@@ -128,10 +121,12 @@
 		<th>Description</th>
 		<th>EPV</th>
 		<th>Creation Date</th>
+		<th>Sprint</th>
 		<th>issueID</th>
 	</tr></thead>
 	<tbody id="table_body_id"></tbody>
 	<tfoot><tr>
+		<th></th>
 		<th></th>
 		<th></th>
 		<th></th>
@@ -147,10 +142,10 @@
 <script>
 	$(document).ready( function () {
 		jQuery.ajax({
-			url:'${pageContext.request.contextPath}/rst/developer/find',
-			type:'post',
+			url:'${pageContext.request.contextPath}/rst/developers/',
+			type:'get',
 			contentType:'application/json; charset=utf-8',
-			data:JSON.stringify({devid: ""}),
+			data:(""),
 			success: function(returndata){
 				developers=returndata;
 			}

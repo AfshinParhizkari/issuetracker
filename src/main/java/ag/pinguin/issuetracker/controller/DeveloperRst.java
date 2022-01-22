@@ -9,7 +9,9 @@ package ag.pinguin.issuetracker.controller;
  * Description:
  */
 import ag.pinguin.issuetracker.entity.Developer;
+import ag.pinguin.issuetracker.entity.IssueDTO;
 import ag.pinguin.issuetracker.service.DeveloperSrv;
+import ag.pinguin.issuetracker.service.StorySrv;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -31,6 +33,7 @@ import javax.validation.Valid;
 @Tag(name = "Developer",description = "Developer info can show and change via this rest service")
 public class DeveloperRst {
     @Autowired private DeveloperSrv srv;
+    @Autowired private StorySrv storySrv;
 
     @Operation(summary = "Set the developerID field to Get a developer or don't set developerID field to show all developers")
     @ApiResponses(value = {
@@ -41,6 +44,17 @@ public class DeveloperRst {
     @Parameter(name = "developerID",description = "Integer identifier", example = "1")
     public String findDevelopers(@RequestParam(required = false) Integer developerID) throws Exception {
         return (new ObjectMapper()).writeValueAsString(srv.findDevelopers(developerID));
+    }
+
+    @Operation(summary = "How much is the developer's load?")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = IssueDTO.class))}),
+            @ApiResponse(responseCode = "500", description = "Internal error", content = @Content) })
+    @Parameter(name = "sprintNum", required = true, description = "Integer identifier", example = "2")
+    @GetMapping(value = "/load" , produces = MediaType.APPLICATION_JSON_VALUE)
+    public String calculateDeveloperLoad(@RequestParam Integer sprintNum) throws Exception {
+        return (new ObjectMapper()).writeValueAsString(storySrv.calculateDeveloperLoad(sprintNum));
     }
 
     @Operation(summary = "Set the developerID field to Delete a developer")

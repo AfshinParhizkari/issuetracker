@@ -9,6 +9,7 @@ package ag.pinguin.issuetracker.service;
  * Description:
  */
 
+import ag.pinguin.issuetracker.entity.IssueDTO;
 import ag.pinguin.issuetracker.entity.Story;
 import ag.pinguin.issuetracker.entity.StoryStatus;
 import ag.pinguin.issuetracker.repository.StoryDao;
@@ -46,4 +47,9 @@ public class StorySrv {
         story=dao.save(story);
         return story;
     }
+
+    public List<IssueDTO> calculateDeveloperLoad(Integer sprintNum) throws Exception {
+        return PlanningSrv.convertArray2IssueDTO(dao.getSumOfDeveloperEPV(sprintNum));
+    }
+
 }

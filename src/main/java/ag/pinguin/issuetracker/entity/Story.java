@@ -19,10 +19,11 @@ import java.util.Objects;
 public class Story extends Issue {
     private Integer estimatedpoint;
     private String status;
+    private Integer sprint;
 
     @Column(name = "estimatedpoint")
     @NotNull(message = "estimatedpoint is required")
-    @Max(value = 5,message = "estimatedpoint between 0=Low to 5=High")
+    //@Max(value = 10,message = "estimatedpoint between 0=Low to 10=High")
     public Integer getEstimatedpoint() {
         return estimatedpoint;
     }
@@ -39,17 +40,21 @@ public class Story extends Issue {
         this.status = status;
     }
 
+    @Column(name = "sprint")
+    public Integer getSprint() {return sprint;}
+    public void setSprint(Integer sprint) {this.sprint = sprint;}
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Story story = (Story) o;
-        return Objects.equals(estimatedpoint, story.estimatedpoint) && Objects.equals(status, story.status) ;
+        return Objects.equals(estimatedpoint, story.estimatedpoint) && Objects.equals(status, story.status) && Objects.equals(sprint, story.sprint);
     }
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), estimatedpoint, status);
+        return Objects.hash(super.hashCode(), estimatedpoint, status, sprint);
     }
 
     @Override
@@ -57,6 +62,7 @@ public class Story extends Issue {
         return "Story{" +
                 "estimatedpoint=" + estimatedpoint +
                 ", status='" + status + '\'' +
+                ", sprint=" + sprint +
                 '}'+super.toString();
     }
 }

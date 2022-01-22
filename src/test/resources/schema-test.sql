@@ -12,6 +12,7 @@ CREATE TABLE story (
                        estimatedpoint INT NOT NULL,/*from 1(Low) to 5(High)*/
                        status varchar2(10) NOT NULL,/*New,Estimated,Completed*/
                        assignedev INT,
+                       sprint INT,
                        foreign key (assignedev) references developer(devid)
 );
 DROP TABLE IF EXISTS bug;

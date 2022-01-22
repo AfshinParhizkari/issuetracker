@@ -30,26 +30,57 @@ public class PlanningSrv {
     @Autowired private StoryDao dao;
     @Autowired private DeveloperDao devDao;
 
-    public List<Story> planCurrentSprint() throws Exception{
-        List<Story> stories =dao.findByStatusNotContains(StoryStatus.Completed);
-        //how much is the developer load(EPV) for this week? example Andre=5 ehsan=4 hossein=0 afshin=6 , ...
-        List<IssueDTO> devCapacities= PlanningSrv.convertArray2IssueDTO(dao.getSumOfDeveloperEPV());
-        IssueDTO firstDev;
-        //Assign the tasks for current sprint to developer with same load. condition: count of task for each dev<=capacity(epv sum)
-        for(int i=0;i< stories.size();i++){ //All not complete tasks
-            Story story =stories.get(i);//select one
+    public List<Story> planAllSprints() throws Exception{
+        Integer sprintNum=dao.getMaxSprint();
+        //OrderByEstimatedpoint: priority based on small EPV stories
+        List<Story> stories =dao.findByStatusNotContainsOrderByEstimatedpoint(StoryStatus.Completed);
+        //how much is developer's load(EPV) for this sprint? example Andre=5 ehsan=4 hossein=0 afshin=7 , ...
+        List<IssueDTO> devCapacities= PlanningSrv.convertArray2IssueDTO(dao.getSumOfDeveloperEPV(sprintNum));
+        IssueDTO freestDev;
+        //Assign the stories to current sprint to developer with same load. condition: sum(EPV) for each dev<=10
+        for(int i=0;i< stories.size();i++){ //All but not completed tasks
+            Story story =stories.get(i);//select smallest EPV story
             if(story.getAssignedev()==null){ //have assigned it before?
-                firstDev = Collections.min(devCapacities, Comparator.comparing(s -> s.getCapacity()));//chose developer with minimum capacity(EPV)
-                if(firstDev.getCapacity()+stories.get(i).getEstimatedpoint()<=BasicData.capacity) {//what about the capacity of developer(EPV)? less than 10?
-                    stories.get(i).setAssignedev(firstDev.getAssignedev());//Assigned
-                    devCapacities.get(devCapacities.indexOf(firstDev)).setCapacity(firstDev.getCapacity()+stories.get(i).getEstimatedpoint());//decrease dev capacity(EPV)
+                freestDev = Collections.min(devCapacities, Comparator.comparing(s -> s.getCapacity()));//chose developer with minimum capacity(EPV)
+                if(freestDev.getCapacity()+stories.get(i).getEstimatedpoint()<=BasicData.capacity) {//what about the capacity of freest developer(EPV)? less than 10?
+                    stories.get(i).setAssignedev(freestDev.getAssignedev());//Assigned Developer
+                    stories.get(i).setSprint(sprintNum);//Assigned sprint
+                    devCapacities.get(devCapacities.indexOf(freestDev)).setCapacity(freestDev.getCapacity()+stories.get(i).getEstimatedpoint());//decrease dev capacity(EPV)
+                }
+                else{//Open new sprint and reset capacity
+                    sprintNum++;
+                    devCapacities= PlanningSrv.convertArray2IssueDTO(dao.getSumOfDeveloperEPV(sprintNum));//all capacities reset to zero
+                    freestDev = Collections.min(devCapacities, Comparator.comparing(s -> s.getCapacity()));
+                    stories.get(i).setAssignedev(freestDev.getAssignedev());//Assigned Developer
+                    stories.get(i).setSprint(sprintNum);//Assigned sprint
+                    devCapacities.get(devCapacities.indexOf(freestDev)).setCapacity(freestDev.getCapacity()+stories.get(i).getEstimatedpoint());//decrease dev capacity(EPV)
+                }
+            }
+        }
+        stories= dao.saveAll(stories);
+        return stories;
+    }
+    //Just Current week based on capacity. other stories are EPIC
+    public List<Story> planCurrentSprint() throws Exception{
+        //OrderByEstimatedpoint: priority based on small EPV stories
+        List<Story> stories =dao.findByStatusNotContainsOrderByEstimatedpoint(StoryStatus.Completed);
+        //how much is developer's load(EPV) for this sprint? example Andre=5 ehsan=4 hossein=0 afshin=7 , ...
+        List<IssueDTO> devCapacities= PlanningSrv.convertArray2IssueDTO(dao.getSumOfDeveloperEPV());
+        IssueDTO freestDev;
+        //Assign the stories to current sprint to developer with same load. condition: sum(EPV) for each dev<=10
+        for(int i=0;i< stories.size();i++){ //All but not completed tasks
+            Story story =stories.get(i);//select smallest EPV story
+            if(story.getAssignedev()==null){ //have assigned it before?
+                freestDev = Collections.min(devCapacities, Comparator.comparing(s -> s.getCapacity()));//chose developer with minimum capacity(EPV)
+                if(freestDev.getCapacity()+stories.get(i).getEstimatedpoint()<=BasicData.capacity) {//what about the capacity of developer(EPV)? less than 10?
+                    stories.get(i).setAssignedev(freestDev.getAssignedev());//Assigned
+                    devCapacities.get(devCapacities.indexOf(freestDev)).setCapacity(freestDev.getCapacity()+stories.get(i).getEstimatedpoint());//decrease dev capacity(EPV)
                 }
             }
         }
         dao.saveAll(stories);
         return stories;
     }
-
     public List<Story> planOldWay() throws Exception{
         //how many task we can do for this time box(max<=capacity*developerCount) and select the tasks
         int developerCount=(int)devDao.count();
@@ -57,15 +88,15 @@ public class PlanningSrv {
         List<Story> stories =dao.findByStatusNotContains(currentWeekTasks,StoryStatus.Completed).getContent();//stories.size()<=capacity*developerCount
         //how much is the developer load for this week? example Andre has 3 tasks, Afshin has 0, ...
         List<IssueDTO> devCapacities= PlanningSrv.convertArray2IssueDTO(dao.getCountOfDeveloperTasks());
-        IssueDTO firstDev =  new IssueDTO();
+        IssueDTO freestDev =  new IssueDTO();
         //Assign the tasks for current week to developer with same load. condition: count of task for each dev<=capacity
         for(int i=0;i< stories.size();i++){//All not complete tasks: max<=capacity*developerCount
             Story story =stories.get(i);//select one
             if(story.getAssignedev()==null){//have assigned it before?
-                firstDev = Collections.min(devCapacities, Comparator.comparing(s -> s.getCapacity()));//choose freest developer
-                if(firstDev.getCapacity()<BasicData.capacity) {//what about the capacity of developer? less than 10?
-                    stories.get(i).setAssignedev(firstDev.getAssignedev());//Assigned
-                    devCapacities.get(devCapacities.indexOf(firstDev)).setCapacity(firstDev.getCapacity()+1);//decrease dev capacity
+                freestDev = Collections.min(devCapacities, Comparator.comparing(s -> s.getCapacity()));//choose freest developer
+                if(freestDev.getCapacity()<BasicData.capacity) {//what about the capacity of developer? less than 10?
+                    stories.get(i).setAssignedev(freestDev.getAssignedev());//Assigned
+                    devCapacities.get(devCapacities.indexOf(freestDev)).setCapacity(freestDev.getCapacity()+1);//decrease dev capacity
                 }
             }
         }
