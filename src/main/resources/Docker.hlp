@@ -10,3 +10,7 @@ Push to docker hub:
  docker login --username=afshinparhizkari
  docker tag issuetracker  afshinparhizkari/myapp:issuetracker
  docker push afshinparhizkari/myapp:issuetracker
+
+ _____________________________________________________________________
+ problem : Permission denied
+ solution: docker.sock srw-rw---- 550 => chmod 666 /var/run/docker.sock

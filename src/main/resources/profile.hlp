@@ -1,0 +1,5 @@
+java -jar -Dspring.profiles.active=opr issuetracker.jar
+
+# other solutions:
+@PropertySource("classpath:xxx.properties")
+@ConfigurationProperties(prefix="sms-file-path")
