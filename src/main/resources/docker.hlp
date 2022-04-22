@@ -1,0 +1,16 @@
+## Build image:
+    cd ./issuetracker/
+    chmod 777 ./issuetracker.war
+    docker build -t ocalhost:5000/issuetracker:test -f ./issuetracker/Dockerfile ./
+
+## Run container:
+docker container run -itd --hostname issuetracker --name issue-tracker -p 8080:8080 -p 7725:7725 localhost:5000/issuetracker:test
+
+# Push to docker hub:
+    docker login --username=afshinparhizkari
+    docker tag issuetracker afshinparhizkari/myapp:issuetracker
+    docker push afshinparhizkari/myapp:issuetracker
+
+ _____________________________________________________________________
+ problem : Permission denied
+ solution: docker.sock srw-rw---- 660 => chmod 666 /var/run/docker.sock
