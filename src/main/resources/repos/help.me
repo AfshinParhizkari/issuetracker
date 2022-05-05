@@ -1,0 +1,11 @@
+repositories:
+1. local : .m2
+2. nexus : http://localhost:8081/repository/maven-public/
+3. cloud :
+            https://repo.maven.apache.org/maven2/
+            https://repo.spring.io/release/
+
+get libs from repositories based on following orders:
+1. insert repositories tag in project's pom.
+2. config in your IDE.
+3. Add setting.xml file in .m2 directory and config profiles tag.

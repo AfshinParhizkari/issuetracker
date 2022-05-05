@@ -13,7 +13,7 @@
 	<version>1</version>
 	<name>issuetracker</name>
 	<description>Issue tracker for IT tasks</description>
-	<url>http://192.168.1.34:8080/issuetracker/</url>
+	<url>http://localhost:8080/issuetracker/</url>
 	<packaging>war</packaging>
 	<developers>
 		<developer>
@@ -117,6 +117,12 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
+<!-- ________________________ Persian Calendar ________________________ -->
+		<dependency>
+			<groupId>com.ibm.icu</groupId>
+			<artifactId>icu4j</artifactId>
+			<version>70.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -134,10 +140,10 @@
 					</excludes>
 				</configuration>
 			</plugin>
-			<plugin><!--  create and push product image in docker private registry in http://192.168.1.34:5000  -->
+			<plugin><!--  create and push product image in docker private registry in http://localhost:5000  -->
 				<groupId>com.spotify</groupId>
 				<artifactId>dockerfile-maven-plugin</artifactId>
-				<version>1.4.10</version>
+				<version>${dockerfile-maven-version}</version>
 				<executions>
 					<execution>
 						<id>default</id>
@@ -156,11 +162,15 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<!--My private repository, nexus: the pom repositories config has top priority-->
 	<repositories>
 		<repository>
-			<id>spring-repo</id>
-			<url>https://repo.spring.io/release</url>
-			<snapshots><enabled>true</enabled></snapshots>
+			<id>maven-int-lib-group</id>
+			<url>http://localhost:8081/repository/maven-public/</url>
+			<releases><enabled>true</enabled></releases>
+			<snapshots><enabled>false</enabled></snapshots>
 		</repository>
 	</repositories>
+
 </project>

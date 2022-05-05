@@ -7,9 +7,19 @@
       <option name="url" value="https://repo.spring.io/release" />
     </remote-repository>
     <remote-repository>
+      <option name="id" value="maven-repo" />
+      <option name="name" value="maven-repo" />
+      <option name="url" value="http://localhost:8081/repository/maven-public/" />
+    </remote-repository>
+    <remote-repository>
       <option name="id" value="central" />
       <option name="name" value="Central Repository" />
       <option name="url" value="https://repo.maven.apache.org/maven2" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven-int-lib-group" />
+      <option name="name" value="maven-int-lib-group" />
+      <option name="url" value="http://localhost:8081/repository/maven-public/" />
     </remote-repository>
     <remote-repository>
       <option name="id" value="central" />
@@ -20,6 +30,21 @@
       <option name="id" value="jboss.community" />
       <option name="name" value="JBoss Community repository" />
       <option name="url" value="https://repository.jboss.org/nexus/content/repositories/public/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven-group" />
+      <option name="name" value="maven-group" />
+      <option name="url" value="http://localhost:8081/repository/maven-public/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="spring-repo" />
+      <option name="name" value="spring-repo" />
+      <option name="url" value="http://localhost:8081/repository/maven-public/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="central" />
+      <option name="name" value="Central Repository" />
+      <option name="url" value="http://localhost:8081/repository/maven-public/" />
     </remote-repository>
   </component>
 </project>
