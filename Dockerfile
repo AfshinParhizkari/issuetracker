@@ -1,4 +1,4 @@
-FROM localhost:5000/openjdk:11.0.13-jre
+FROM localhost:5000/openjdk:11
 MAINTAINER "Afshin.Parhizkari@gmail.com"
 VOLUME /tmp
 ARG JAR_FILE

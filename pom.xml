@@ -121,9 +121,19 @@
 		<dependency>
 			<groupId>com.ibm.icu</groupId>
 			<artifactId>icu4j</artifactId>
-			<version>70.1</version>
+			<version>72.1</version>
 		</dependency>
 	</dependencies>
+
+	<distributionManagement>
+		<repository>
+			<uniqueVersion>false</uniqueVersion>
+			<id>nexus</id>
+			<name>my-nexus-repo</name>
+			<url>http://afshin:8081/repository/mvn-hosted/</url>
+			<layout>default</layout>
+		</repository>
+	</distributionManagement>
 
 	<build>
 		<finalName>issuetracker</finalName>
@@ -140,10 +150,31 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+				</configuration>
+				<executions>
+					<execution>
+						<id>default-compile</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.8.2</version>
+			</plugin>
 			<plugin><!--  create and push product image in docker private registry in http://localhost:5000  -->
 				<groupId>com.spotify</groupId>
 				<artifactId>dockerfile-maven-plugin</artifactId>
-				<version>${dockerfile-maven-version}</version>
+				<version>1.4.13</version>
 				<executions>
 					<execution>
 						<id>default</id>
@@ -164,13 +195,13 @@
 	</build>
 
 	<!--My private repository, nexus: the pom repositories config has top priority-->
-	<repositories>
+	<!--<repositories>
 		<repository>
 			<id>maven-int-lib-group</id>
 			<url>http://localhost:8081/repository/maven-public/</url>
 			<releases><enabled>true</enabled></releases>
 			<snapshots><enabled>false</enabled></snapshots>
 		</repository>
-	</repositories>
+	</repositories>-->
 
 </project>
